@@ -20,6 +20,7 @@ class Order(models.Model):
     notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    is_hidden_by_user = models.BooleanField(default=False)
 
     class Meta:
         ordering = ['-created_at']
