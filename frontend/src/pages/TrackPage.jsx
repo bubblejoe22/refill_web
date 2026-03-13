@@ -11,11 +11,17 @@ const STEPS = [
 
 const STEP_INDEX = { pending: 0, processing: 1, shipped: 2, delivered: 3 }
 
+// Orders can only be cancelled before they're shipped
+const CANCELLABLE_STATUSES = ['pending', 'processing']
+
 export default function TrackPage({ navigate, orderId, order: passedOrder }) {
-  const { orders } = useOrders()
-  const [order, setOrder]   = useState(passedOrder || null)
-  const [loading, setLoading] = useState(false)
+  const { orders, refreshOrders } = useOrders()
+  const [order, setOrder]           = useState(passedOrder || null)
+  const [loading, setLoading]       = useState(false)
   const [selectedId, setSelectedId] = useState(orderId || null)
+  const [confirmCancel, setConfirmCancel] = useState(false)
+  const [cancelling, setCancelling]       = useState(false)
+  const [cancelError, setCancelError]     = useState(null)
 
   // Active orders from context
   const activeOrders = orders.filter(o =>
@@ -28,7 +34,6 @@ export default function TrackPage({ navigate, orderId, order: passedOrder }) {
       ordersAPI.getById(selectedId)
         .then(r => setOrder(r.data))
         .catch(() => {
-          // Fallback to context
           const found = orders.find(o => o.id === selectedId)
           if (found) setOrder(found)
         })
@@ -39,8 +44,25 @@ export default function TrackPage({ navigate, orderId, order: passedOrder }) {
     }
   }, [selectedId])
 
-  const currentStep = STEP_INDEX[order?.status?.toLowerCase()] ?? 0
-  const isCancelled = order?.status?.toLowerCase() === 'cancelled'
+  const handleCancelOrder = async () => {
+    setCancelling(true)
+    setCancelError(null)
+    try {
+      await ordersAPI.updateStatus(order.id, 'cancelled')
+      setOrder(prev => ({ ...prev, status: 'cancelled' }))
+      setConfirmCancel(false)
+      // Refresh orders list in context if available
+      if (typeof refreshOrders === 'function') refreshOrders()
+    } catch (err) {
+      setCancelError('Failed to cancel order. Please try again.')
+    } finally {
+      setCancelling(false)
+    }
+  }
+
+  const currentStep  = STEP_INDEX[order?.status?.toLowerCase()] ?? 0
+  const isCancelled  = order?.status?.toLowerCase() === 'cancelled'
+  const isCancellable = CANCELLABLE_STATUSES.includes(order?.status?.toLowerCase())
 
   return (
     <div className="track-page">
@@ -52,7 +74,7 @@ export default function TrackPage({ navigate, orderId, order: passedOrder }) {
             {activeOrders.map(o => (
               <button key={o.id}
                 className={`track-pill ${selectedId === o.id ? 'active' : ''}`}
-                onClick={() => { setSelectedId(o.id); setOrder(o) }}>
+                onClick={() => { setSelectedId(o.id); setOrder(o); setConfirmCancel(false) }}>
                 #{o.id} — {o.station || o.shipping_address || 'Order'}
               </button>
             ))}
@@ -137,6 +159,41 @@ export default function TrackPage({ navigate, orderId, order: passedOrder }) {
                   <button className="btn-primary" onClick={() => navigate('browse')} style={{marginTop:'12px'}}>
                     Order Again
                   </button>
+                </div>
+              )}
+
+              {/* Cancel order section — only shown for pending/processing */}
+              {isCancellable && (
+                <div className="track-cancel-wrap">
+                  {!confirmCancel ? (
+                    <button
+                      className="btn-cancel-order"
+                      onClick={() => { setConfirmCancel(true); setCancelError(null) }}
+                    >
+                      Cancel Order
+                    </button>
+                  ) : (
+                    <div className="track-cancel-confirm">
+                      <p>Are you sure you want to cancel this order?</p>
+                      {cancelError && <p className="cancel-error">{cancelError}</p>}
+                      <div className="cancel-confirm-actions">
+                        <button
+                          className="btn-cancel-confirm"
+                          onClick={handleCancelOrder}
+                          disabled={cancelling}
+                        >
+                          {cancelling ? 'Cancelling…' : 'Yes, Cancel'}
+                        </button>
+                        <button
+                          className="btn-cancel-dismiss"
+                          onClick={() => { setConfirmCancel(false); setCancelError(null) }}
+                          disabled={cancelling}
+                        >
+                          Keep Order
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </>

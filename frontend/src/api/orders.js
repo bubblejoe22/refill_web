@@ -34,4 +34,9 @@ export const ordersAPI = {
   updateStatus: (id, status) => {
     return apiClient.patch(`/orders/${id}/`, { status })
   },
+
+  // Soft-hide an order from the user's history
+  hide: (id) => {
+    return apiClient.post(`/orders/${id}/hide/`)
+  },
 }

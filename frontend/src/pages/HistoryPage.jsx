@@ -1,4 +1,6 @@
+import { useState } from 'react'
 import { useOrders } from '../context/OrdersContext'
+import { ordersAPI } from '../api/orders'
 
 const fmt = (n) => `₱${Number(n).toLocaleString()}`
 
@@ -12,8 +14,23 @@ const STATUS_COLOR = {
 
 export default function HistoryPage({ navigate }) {
   const { orders, loading, fetchOrders } = useOrders()
+  const [confirmHideId, setConfirmHideId] = useState(null)
+  const [hiding, setHiding] = useState(false)
 
   const getStyle = (status) => STATUS_COLOR[status?.toLowerCase()] || { bg: '#f1f5f9', color: '#64748b' }
+
+  const handleHide = async (id) => {
+    setHiding(true)
+    try {
+      await ordersAPI.hide(id)
+      await fetchOrders()
+    } catch (e) {
+      // silently fail — order stays visible
+    } finally {
+      setHiding(false)
+      setConfirmHideId(null)
+    }
+  }
 
   return (
     <div>
@@ -47,6 +64,7 @@ export default function HistoryPage({ navigate }) {
             <tbody>
               {orders.map(o => {
                 const s = getStyle(o.status)
+                const isConfirming = confirmHideId === o.id
                 return (
                   <tr key={o.id}>
                     <td className="td-muted">#{o.id}</td>
@@ -62,6 +80,35 @@ export default function HistoryPage({ navigate }) {
                         <button className="reorder-btn" onClick={() => navigate('track', { orderId: o.id })}>📍 Track</button>
                       )}
                       <button className="reorder-btn" onClick={() => navigate('browse')}>↻ Reorder</button>
+
+                      {/* Hide button — only for completed/cancelled orders */}
+                      {['delivered', 'cancelled'].includes(o.status?.toLowerCase()) && (
+                        isConfirming ? (
+                          <>
+                            <button
+                              className="reorder-btn hide-confirm-btn"
+                              onClick={() => handleHide(o.id)}
+                              disabled={hiding}
+                            >
+                              {hiding ? '…' : 'Delete'}
+                            </button>
+                            <button
+                              className="reorder-btn"
+                              onClick={() => setConfirmHideId(null)}
+                              disabled={hiding}
+                            >
+                              Keep
+                            </button>
+                          </>
+                        ) : (
+                          <button
+                            className="reorder-btn hide-btn"
+                            onClick={() => setConfirmHideId(o.id)}
+                          >
+                            ✕ Delete
+                          </button>
+                        )
+                      )}
                     </td>
                   </tr>
                 )
