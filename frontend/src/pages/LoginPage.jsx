@@ -3,8 +3,8 @@ import { useAuth } from '../context/AuthContext'
 
 export default function LoginPage({ navigate }) {
   const { login } = useAuth()
-  const [form, setForm]     = useState({ username: '', password: '' })
-  const [error, setError]   = useState('')
+  const [form, setForm] = useState({ username: '', password: '' })
+  const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
   const set = (k) => (e) => setForm(f => ({ ...f, [k]: e.target.value }))
