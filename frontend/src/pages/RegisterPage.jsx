@@ -5,7 +5,7 @@ import apiClient from '../api/client'
 export default function RegisterPage({ navigate }) {
   const { login } = useAuth()
   const [form, setForm] = useState({ username: '', email: '', password: '', confirm: '' })
-  const [error, setError]     = useState('')
+  const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
   const set = (k) => (e) => setForm(f => ({ ...f, [k]: e.target.value }))
@@ -21,8 +21,10 @@ export default function RegisterPage({ navigate }) {
         username: form.username,
         email: form.email,
         password: form.password,
+        re_password: form.confirm, // Djoser requires re_password
       })
-      // Auto-login after register
+
+      // Auto-login after successful registration
       await login(form.username, form.password)
       navigate('home')
     } catch (e) {

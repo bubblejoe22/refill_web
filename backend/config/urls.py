@@ -1,7 +1,3 @@
-"""
-URL configuration for refill_web project.
-"""
-
 from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
@@ -9,7 +5,12 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/auth/', include('apps.users.urls')),
+
+    # Auth endpoints (Djoser handles registration, token login/logout)
+    path('api/auth/', include('djoser.urls')),          # /users/ POST → register
+    path('api/auth/', include('djoser.urls.authtoken')), # /token/login/ /token/logout/
+
+    # Other apps
     path('api/products/', include('apps.products.urls')),
     path('api/orders/', include('apps.orders.urls')),
 ]
