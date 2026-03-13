@@ -1,110 +1,171 @@
 import { useAuth } from '../context/AuthContext'
 import { useOrders } from '../context/OrdersContext'
+import { FaShoppingCart, FaCalendarAlt, FaHistory, FaTint, FaStar, FaMapMarkerAlt } from "react-icons/fa"
 
 const fmt = (n) => `₱${Number(n).toLocaleString()}`
 
-const STATUS_COLOR = {
-  delivered:  '#10b981', pending: '#f59e0b',
-  processing: '#3b82f6', shipped: '#8b5cf6', cancelled: '#ef4444',
-}
-
 export default function HomePage({ navigate }) {
+
   const { user } = useAuth()
   const { orders } = useOrders()
 
-  const recentOrders  = orders.slice(0, 3)
-  const totalSpent    = orders.reduce((a, o) => a + parseFloat(o.total || o.total_price || 0), 0)
-  const totalGallons  = orders.reduce((a, o) => a + (o.qty || o.quantity || 0), 0)
-  const pendingOrders = orders.filter(o => ['pending','processing','shipped'].includes(o.status?.toLowerCase()))
-
-  const initials = user?.username?.slice(0, 2).toUpperCase() || 'U'
+  const recentOrders = orders.slice(0,3)
 
   return (
-    <div className="home-page">
-      {/* Hero greeting */}
-      <div className="home-hero">
-        <div className="home-hero-text">
-          <p className="home-greeting">Hello, {user?.username}! 👋</p>
-          <h2 className="home-headline">Need a refill today?</h2>
-          <p className="home-desc">Order fresh water delivered to your door in minutes.</p>
-          <button className="btn-primary" onClick={() => navigate('browse')}>🛒 Order Now</button>
-        </div>
-        <div className="home-hero-art">💧</div>
+    <>
+    
+
+
+
+<div className="dashboard">
+
+<main className="main">
+
+<div className="topbar">
+  <h2>Hello, {user?.username} 👋</h2>
+  <div style={{display:"flex",alignItems:"center",gap:"6px"}}>
+    <FaMapMarkerAlt/> Carmen, Cagayan de Oro
+  </div>
+</div>
+
+
+{/* QUICK ACTIONS */}
+
+<div className="quick-grid">
+
+<div className="quick-card" onClick={()=>navigate('browse')}>
+<FaShoppingCart size={28}/>
+<p>Refill Now</p>
+</div>
+
+<div className="quick-card" onClick={()=>navigate('schedule')}>
+<FaCalendarAlt size={28}/>
+<p>Schedule</p>
+</div>
+
+<div className="quick-card" onClick={()=>navigate('history')}>
+<FaHistory size={28}/>
+<p>History</p>
+</div>
+
+</div>
+
+
+{/* NEARBY STATIONS */}
+
+<div className="section">
+
+<h3>Nearby Stations</h3>
+
+<div className="station-grid">
+
+<div className="station-card">
+
+  <div className="station-header">
+
+    <div className="station-left">
+      <div className="station-icon">
+        <FaTint/>
       </div>
 
-      {/* Stats row */}
-      <div className="home-stats">
-        <div className="hstat"><div className="hstat-val">{orders.length}</div><div className="hstat-label">Total Orders</div></div>
-        <div className="hstat"><div className="hstat-val">{totalGallons}</div><div className="hstat-label">Gallons</div></div>
-        <div className="hstat"><div className="hstat-val">{fmt(totalSpent)}</div><div className="hstat-label">Total Spent</div></div>
-        <div className="hstat"><div className="hstat-val">{pendingOrders.length}</div><div className="hstat-label">Active</div></div>
-      </div>
-
-      {/* Quick actions */}
-      <div className="home-section">
-        <div className="home-section-title">Quick Actions</div>
-        <div className="quick-actions">
-          <button className="qa-btn" onClick={() => navigate('browse')}>
-            <span className="qa-icon">🛒</span><span>Refill Now</span>
-          </button>
-          <button className="qa-btn" onClick={() => navigate('schedule')}>
-            <span className="qa-icon">📅</span><span>Schedule</span>
-          </button>
-          <button className="qa-btn" onClick={() => navigate('history')}>
-            <span className="qa-icon">📋</span><span>History</span>
-          </button>
-          <button className="qa-btn" onClick={() => navigate('track')}>
-            <span className="qa-icon">📍</span><span>Track</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Active orders alert */}
-      {pendingOrders.length > 0 && (
-        <div className="active-orders-banner" onClick={() => navigate('track', { order: pendingOrders[0] })}>
-          <span>🚚</span>
-          <div>
-            <div className="aob-title">You have {pendingOrders.length} active order{pendingOrders.length > 1 ? 's' : ''}</div>
-            <div className="aob-sub">Tap to track your delivery</div>
-          </div>
-          <span className="chevron">›</span>
-        </div>
-      )}
-
-      {/* Recent orders */}
-      <div className="home-section">
-        <div className="home-section-header">
-          <div className="home-section-title">Recent Orders</div>
-          {orders.length > 0 && (
-            <button className="link-btn" onClick={() => navigate('history')}>View all →</button>
-          )}
-        </div>
-
-        {recentOrders.length === 0 ? (
-          <div className="home-empty">
-            <span>📋</span>
-            <p>No orders yet — place your first one!</p>
-            <button className="btn-primary" onClick={() => navigate('browse')}>Browse Stations</button>
-          </div>
-        ) : (
-          <div className="recent-orders">
-            {recentOrders.map(o => (
-              <div key={o.id} className="ro-card">
-                <div className="ro-top">
-                  <div className="ro-station">{o.station || o.notes || o.shipping_address || '—'}</div>
-                  <span className="ro-status" style={{ background: STATUS_COLOR[o.status?.toLowerCase()] + '22', color: STATUS_COLOR[o.status?.toLowerCase()] }}>
-                    {o.status}
-                  </span>
-                </div>
-                <div className="ro-meta">
-                  <span>{o.date || o.created_at?.slice(0,10) || '—'}</span>
-                  <span>{o.qty || o.quantity || 0} gal · {fmt(o.total || o.total_price || 0)}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+      <div>
+        <h3 className="station-name">AquaPure Station</h3>
+        <p className="station-distance">
+          <FaMapMarkerAlt/> 0.5 km
+        </p>
       </div>
     </div>
+
+    <div className="station-rating">
+      <FaStar/> 4.8
+    </div>
+
+  </div>
+
+
+  <div className="station-tags">
+    <span>Purified</span>
+    <span>Alkaline</span>
+  </div>
+
+
+  <div className="station-info">
+
+    <div>
+      <p>PER GALLON</p>
+      <h4>₱25</h4>
+    </div>
+
+    <div>
+      <p>DELIVERY</p>
+      <h4>₱20</h4>
+    </div>
+
+    <div>
+      <p>ETA</p>
+      <h4>15–20 min</h4>
+    </div>
+
+  </div>
+
+
+  <div className="station-actions">
+
+    <button
+      className="order-btn"
+      onClick={() => navigate("browse")}
+    >
+      <FaShoppingCart/>
+      Order Now
+    </button>
+
+    <button
+      className="calendar-btn"
+      onClick={() => navigate("schedule")}
+    > 
+      <FaCalendarAlt/>
+    </button>
+
+  </div>
+
+</div>
+
+</div>
+
+</div>
+
+
+{/* RECENT ORDERS */}
+
+<div className="section">
+
+<h3>Recent Orders</h3>
+
+{recentOrders.map(o => (
+
+<div key={o.id} className="order-card">
+
+<div>
+<strong>{o.station || "Water Station"}</strong>
+<p>{o.qty || 0} gal</p>
+</div>
+
+<div>
+<span>{o.status}</span>
+<p>{fmt(o.total || 0)}</p>
+</div>
+
+</div>
+
+))}
+
+</div>
+
+
+</main>
+
+</div>
+
+</>
   )
 }
