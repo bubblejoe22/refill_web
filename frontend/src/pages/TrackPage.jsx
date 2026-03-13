@@ -1,49 +1,145 @@
+// =============================================================
+// TrackPage.jsx
+// =============================================================
+// Shows the order tracking timeline + ORDER NOTES section.
+//
+// ORDER NOTES CRUD here:
+//   READ   — fetched from GET /api/orders/{id}/notes/ on load
+//   CREATE — customer adds a new note via the text input
+//   UPDATE — customer edits their own note inline
+//   DELETE — customer deletes their own note
+//
+// Notes typed in OrderPage / SchedulePage appear here automatically
+// because they are fetched fresh from the API on every load.
+// =============================================================
+
 import { useState, useEffect } from 'react'
 import { useOrders } from '../context/OrdersContext'
 import { ordersAPI } from '../api/orders'
 
 const STEPS = [
-  { id: 'pending',    icon: '📋', label: 'Order Placed',     desc: 'Your order has been received' },
-  { id: 'processing', icon: '⚙️',  label: 'Processing',       desc: 'Station is preparing your water' },
-  { id: 'shipped',    icon: '🚚', label: 'Out for Delivery',  desc: 'Driver is on the way' },
-  { id: 'delivered',  icon: '✅', label: 'Delivered',         desc: 'Order successfully delivered' },
+  { id: 'pending',    icon: '📋', label: 'Order Placed',    desc: 'Your order has been received' },
+  { id: 'processing', icon: '⚙️',  label: 'Processing',      desc: 'Station is preparing your water' },
+  { id: 'shipped',    icon: '🚚', label: 'Out for Delivery', desc: 'Driver is on the way' },
+  { id: 'delivered',  icon: '✅', label: 'Delivered',        desc: 'Order successfully delivered' },
 ]
-
 const STEP_INDEX = { pending: 0, processing: 1, shipped: 2, delivered: 3 }
 
 export default function TrackPage({ navigate, orderId, order: passedOrder }) {
   const { orders } = useOrders()
-  const [order, setOrder]   = useState(passedOrder || null)
-  const [loading, setLoading] = useState(false)
+  const [order,      setOrder]      = useState(passedOrder || null)
+  const [loading,    setLoading]    = useState(false)
   const [selectedId, setSelectedId] = useState(orderId || null)
 
-  // Active orders from context
+  // ── ORDER NOTES state ────────────────────────────────────────
+  const [notes,       setNotes]       = useState([])       // list of OrderNote objects
+  const [notesLoading,setNotesLoading]= useState(false)
+  const [newNote,     setNewNote]     = useState('')        // text in the "add note" input
+  const [noteError,   setNoteError]   = useState('')        // FORM VALIDATION error
+  const [savingNote,  setSavingNote]  = useState(false)
+  // For inline edit: { id, content } of the note being edited, or null
+  const [editingNote, setEditingNote] = useState(null)
+  const [editError,   setEditError]   = useState('')        // FORM VALIDATION error for edit
+
   const activeOrders = orders.filter(o =>
-    ['pending','processing','shipped'].includes(o.status?.toLowerCase())
+    ['pending', 'processing', 'shipped'].includes(o.status?.toLowerCase())
   )
 
+  // ── Fetch order details ───────────────────────────────────────
   useEffect(() => {
     if (selectedId) {
       setLoading(true)
       ordersAPI.getById(selectedId)
-        .then(r => setOrder(r.data))
+        .then(r => { setOrder(r.data); fetchNotes(r.data.id) })
         .catch(() => {
-          // Fallback to context
           const found = orders.find(o => o.id === selectedId)
-          if (found) setOrder(found)
+          if (found) { setOrder(found); fetchNotes(found.id) }
         })
         .finally(() => setLoading(false))
     } else if (activeOrders.length > 0 && !order) {
-      setOrder(activeOrders[0])
-      setSelectedId(activeOrders[0].id)
+      const first = activeOrders[0]
+      setOrder(first)
+      setSelectedId(first.id)
+      fetchNotes(first.id)
     }
   }, [selectedId])
+
+  // ── CRUD: READ — fetch all notes for this order ───────────────
+  const fetchNotes = async (id) => {
+    setNotesLoading(true)
+    try {
+      const r = await ordersAPI.notes.getAll(id)
+      setNotes(Array.isArray(r.data) ? r.data : r.data?.results || [])
+    } catch {
+      setNotes([])
+    } finally {
+      setNotesLoading(false)
+    }
+  }
+
+  // ── FORM VALIDATION — note text ───────────────────────────────
+  const validateNote = (text, setErr) => {
+    if (!text.trim())         { setErr('Note cannot be empty.');            return false }
+    if (text.length > 1000)   { setErr('Note cannot exceed 1000 characters.'); return false }
+    setErr('')
+    return true
+  }
+
+  // ── CRUD: CREATE — add a new note ─────────────────────────────
+  const handleAddNote = async () => {
+    if (!validateNote(newNote, setNoteError)) return
+    setSavingNote(true)
+    try {
+      const r = await ordersAPI.notes.create(order.id, {
+        content:   newNote.trim(),
+        note_type: 'customer',
+      })
+      setNotes(prev => [...prev, r.data])   // append new note to list
+      setNewNote('')
+      setNoteError('')
+    } catch (err) {
+      setNoteError(err.response?.data?.content?.[0] || 'Failed to save note.')
+    } finally {
+      setSavingNote(false)
+    }
+  }
+
+  // ── CRUD: UPDATE — save an edited note ────────────────────────
+  const handleSaveEdit = async () => {
+    if (!validateNote(editingNote.content, setEditError)) return
+    setSavingNote(true)
+    try {
+      const r = await ordersAPI.notes.update(order.id, editingNote.id, {
+        content: editingNote.content.trim(),
+      })
+      // Replace old note in list with updated one
+      setNotes(prev => prev.map(n => n.id === editingNote.id ? r.data : n))
+      setEditingNote(null)
+      setEditError('')
+    } catch (err) {
+      setEditError(err.response?.data?.content?.[0] || 'Failed to update note.')
+    } finally {
+      setSavingNote(false)
+    }
+  }
+
+  // ── CRUD: DELETE — remove a note ─────────────────────────────
+  const handleDeleteNote = async (noteId) => {
+    if (!window.confirm('Delete this note?')) return
+    try {
+      await ordersAPI.notes.delete(order.id, noteId)
+      setNotes(prev => prev.filter(n => n.id !== noteId))   // remove from list
+    } catch {
+      alert('Could not delete note. Please try again.')
+    }
+  }
 
   const currentStep = STEP_INDEX[order?.status?.toLowerCase()] ?? 0
   const isCancelled = order?.status?.toLowerCase() === 'cancelled'
 
   return (
     <div className="track-page">
+
       {/* Order selector */}
       {activeOrders.length > 1 && (
         <div className="track-selector">
@@ -52,7 +148,7 @@ export default function TrackPage({ navigate, orderId, order: passedOrder }) {
             {activeOrders.map(o => (
               <button key={o.id}
                 className={`track-pill ${selectedId === o.id ? 'active' : ''}`}
-                onClick={() => { setSelectedId(o.id); setOrder(o) }}>
+                onClick={() => { setSelectedId(o.id); setOrder(o); setNotes([]) }}>
                 #{o.id} — {o.station || o.shipping_address || 'Order'}
               </button>
             ))}
@@ -72,12 +168,13 @@ export default function TrackPage({ navigate, orderId, order: passedOrder }) {
 
       {order && !loading && (
         <div className="track-container">
+
           {/* Order info card */}
           <div className="track-info-card">
             <div className="track-order-id">Order #{order.id}</div>
             <div className="track-order-detail">{order.station || order.notes || order.shipping_address || '—'}</div>
             <div className="track-order-meta">
-              <span>📅 {order.date || order.created_at?.slice(0,10) || '—'}</span>
+              <span>📅 {order.date || order.created_at?.slice(0, 10) || '—'}</span>
               <span>💧 {order.qty || order.quantity || '—'} gal</span>
               <span>₱{order.total || order.total_price || 0}</span>
             </div>
@@ -95,7 +192,8 @@ export default function TrackPage({ navigate, orderId, order: passedOrder }) {
               {/* Progress bar */}
               <div className="track-progress-wrap">
                 <div className="track-progress-bar">
-                  <div className="track-progress-fill" style={{ width: `${(currentStep / (STEPS.length - 1)) * 100}%` }} />
+                  <div className="track-progress-fill"
+                    style={{ width: `${(currentStep / (STEPS.length - 1)) * 100}%` }} />
                 </div>
               </div>
 
@@ -120,7 +218,6 @@ export default function TrackPage({ navigate, orderId, order: passedOrder }) {
                 })}
               </div>
 
-              {/* ETA */}
               {order.status?.toLowerCase() !== 'delivered' && (
                 <div className="track-eta">
                   <span>⏱</span>
@@ -134,13 +231,118 @@ export default function TrackPage({ navigate, orderId, order: passedOrder }) {
               {order.status?.toLowerCase() === 'delivered' && (
                 <div className="track-delivered-banner">
                   ✅ Delivered! Enjoy your fresh water.
-                  <button className="btn-primary" onClick={() => navigate('browse')} style={{marginTop:'12px'}}>
+                  <button className="btn-primary" onClick={() => navigate('browse')} style={{ marginTop: '12px' }}>
                     Order Again
                   </button>
                 </div>
               )}
             </>
           )}
+
+          {/* ════════════════════════════════════════════════════
+              ORDER NOTES SECTION
+              — Notes typed in OrderPage/SchedulePage appear here.
+              — Customer can also add, edit, or delete notes here.
+          ════════════════════════════════════════════════════ */}
+          <div className="notes-section">
+            <div className="notes-header">
+              <span className="notes-title">📝 Your Notes</span>
+              {notes.length > 0 && (
+                <span className="notes-count">{notes.length} note{notes.length !== 1 ? 's' : ''}</span>
+              )}
+            </div>
+
+            {/* CRUD: READ — list of existing notes */}
+            {notesLoading ? (
+              <p className="notes-loading">Loading notes…</p>
+            ) : notes.length === 0 ? (
+              <p className="notes-empty">No notes yet. Add one below.</p>
+            ) : (
+              <div className="notes-list">
+                {notes.map(note => (
+                  <div key={note.id} className="note-item">
+                    {/* CRUD: UPDATE — inline edit mode */}
+                    {editingNote?.id === note.id ? (
+                      <div className="note-edit-mode">
+                        <textarea
+                          className={`text-inp note-inp ${editError ? 'inp-error' : ''}`}
+                          rows={3}
+                          maxLength={1000}
+                          value={editingNote.content}
+                          onChange={e => {
+                            setEditingNote(prev => ({ ...prev, content: e.target.value }))
+                            if (editError) setEditError('')
+                          }}
+                        />
+                        <p className={`note-char-count ${editingNote.content.length > 900 ? 'warn' : ''}`}>
+                          {editingNote.content.length} / 1000
+                        </p>
+                        {editError && <p className="field-error">{editError}</p>}
+                        <div className="note-edit-btns">
+                          <button className="btn-ghost note-btn" onClick={() => { setEditingNote(null); setEditError('') }}>
+                            Cancel
+                          </button>
+                          <button className="btn-primary note-btn" onClick={handleSaveEdit} disabled={savingNote}>
+                            {savingNote ? 'Saving…' : 'Save'}
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      /* Normal read view */
+                      <div className="note-read-mode">
+                        <p className="note-content">"{note.content}"</p>
+                        <div className="note-meta">
+                          <span className="note-date">
+                            {note.created_at
+                              ? new Date(note.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+                              : '—'}
+                          </span>
+                          <div className="note-actions">
+                            {/* CRUD: UPDATE — enter edit mode */}
+                            <button className="note-action-btn edit-btn"
+                              onClick={() => { setEditingNote({ id: note.id, content: note.content }); setEditError('') }}>
+                              ✏️ Edit
+                            </button>
+                            {/* CRUD: DELETE — remove this note */}
+                            <button className="note-action-btn delete-btn"
+                              onClick={() => handleDeleteNote(note.id)}>
+                              🗑 Delete
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* CRUD: CREATE — add a new note */}
+            <div className="note-add-form">
+              <label className="form-label">Add a note</label>
+              <textarea
+                className={`text-inp note-inp ${noteError ? 'inp-error' : ''}`}
+                placeholder="e.g. Leave at the gate, call before arriving…"
+                rows={2}
+                maxLength={1000}
+                value={newNote}
+                onChange={e => { setNewNote(e.target.value); if (noteError) setNoteError('') }}
+              />
+              <div className="note-add-footer">
+                <p className={`note-char-count ${newNote.length > 900 ? 'warn' : ''}`}>
+                  {newNote.length} / 1000
+                </p>
+                {noteError && <p className="field-error">{noteError}</p>}
+                <button className="btn-primary note-submit-btn"
+                  onClick={handleAddNote}
+                  disabled={savingNote || !newNote.trim()}>
+                  {savingNote ? 'Saving…' : '+ Add Note'}
+                </button>
+              </div>
+            </div>
+          </div>
+          {/* ════════════════ END ORDER NOTES SECTION ════════════ */}
+
         </div>
       )}
     </div>
