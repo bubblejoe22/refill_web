@@ -4,7 +4,7 @@ export default function WelcomePage({ navigate }) {
       <div className="welcome-bg" />
       <div className="welcome-content">
         <div className="welcome-logo">💧</div>
-        <h1 className="welcome-title">Refill Web</h1>
+        <h1 className="welcome-title">Refill on Wheels</h1>
         <p className="welcome-tagline">Fresh water delivered to your door.<br />Fast, affordable, and reliable.</p>
 
         <div className="welcome-features">

@@ -134,6 +134,8 @@ REST_FRAMEWORK = {
 
 DJOSER = {
     'LOGIN_FIELD': 'username',
+    'TOKEN_MODEL': 'rest_framework.authtoken.models.Token',
+    'USER_CREATE_PASSWORD_RETYPE': True,  # optional but good for validation
 }
 # ============================================================================
 # CORS & CSRF Configuration

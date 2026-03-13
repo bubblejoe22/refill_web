@@ -25,7 +25,7 @@ export default function AppShell({ page, navigate, children }) {
         <div className="sidebar-brand">
           <div className="brand-drop">💧</div>
           <div>
-            <div className="brand-name">Refill Web</div>
+            <div className="brand-name">Refill on Wheels</div>
             <div className="brand-sub">Water Delivery</div>
           </div>
         </div>
