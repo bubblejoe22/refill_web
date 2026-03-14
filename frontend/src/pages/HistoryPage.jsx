@@ -84,7 +84,6 @@ export default function HistoryPage({ navigate }) {
             </thead>
             <tbody>
               {orders.map(o => {
-                const s = getStyle(o.status)
                 const isConfirming = confirmHideId === o.id
                 const s     = getStyle(o.status)
                 const nCount = noteCount(o)

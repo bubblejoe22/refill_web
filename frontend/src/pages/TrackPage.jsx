@@ -13,7 +13,6 @@ const STEPS = [
   { id: 'delivered',  icon: '✅', label: 'Delivered',        desc: 'Order successfully delivered' },
 ]
 const STEP_INDEX = { pending: 0, processing: 1, shipped: 2, delivered: 3 }
-const CANCELLABLE_STATUSES = ['pending', 'processing']
 
 // Orders can only be cancelled before they're shipped
 const CANCELLABLE_STATUSES = ['pending', 'processing']

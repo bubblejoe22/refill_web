@@ -20,7 +20,7 @@ export const ordersAPI = {
     return apiClient.post('/orders/', data)
   },
 
-  // Update order (status, etc.)
+  // Update order
   update: (id, data) => {
     return apiClient.patch(`/orders/${id}/`, data)
   },
@@ -35,19 +35,18 @@ export const ordersAPI = {
     return apiClient.patch(`/orders/${id}/`, { status })
   },
 
-  // Soft-hide an order from the user's history
+  // Hide order
   hide: (id) => {
     return apiClient.post(`/orders/${id}/hide/`)
   },
-}
 
-  // Items sub-resource — maps to /api/orders/{order_pk}/items/
+  // Items sub-resource
   items: {
     create: (orderId, data) =>
       apiClient.post(`/orders/${orderId}/items/`, data),
   },
 
-  // Notes sub-resource — maps to /api/orders/{order_pk}/notes/
+  // Notes sub-resource
   notes: {
     getAll: (orderId) =>
       apiClient.get(`/orders/${orderId}/notes/`),
