@@ -170,3 +170,128 @@
     flex-direction: column;
   }
 }
+
+@media (max-width: 768px) {
+  /* Order / Schedule pages */
+  .op-page {
+    padding: 16px;
+    align-items: flex-start;
+  }
+
+  .op-card {
+    grid-template-columns: 1fr;
+    min-height: unset;
+    border-radius: 16px;
+  }
+
+  .op-sidebar {
+    padding: 24px 20px;
+    border-radius: 0;
+  }
+
+  .op-sidebar__title {
+    font-size: 18px;
+    margin-bottom: 16px;
+  }
+
+  /* Hide the steps list on mobile to save space */
+  .op-steps {
+    display: none;
+  }
+
+  .op-station-pill {
+    margin-top: 16px;
+  }
+
+  .op-content {
+    padding: 24px 20px;
+  }
+
+  .op-freq-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .op-row-2 {
+    grid-template-columns: 1fr;
+  }
+
+  .op-footer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+  }
+
+  .op-footer__actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .op-btn-primary,
+  .op-btn-ghost {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .op-success__actions {
+    flex-direction: column;
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Hide table headers and switch to card layout */
+  .orders-table thead {
+    display: none;
+  }
+
+  .orders-table,
+  .orders-table tbody,
+  .orders-table tr,
+  .orders-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .orders-table tr {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 10px;
+    padding: 14px 16px;
+  }
+
+  .orders-table tr:hover td {
+    background: transparent;
+  }
+
+  .orders-table td {
+    padding: 4px 0;
+    border-bottom: none;
+    font-size: 13px;
+  }
+
+  /* Label each cell using data attributes */
+  .orders-table td::before {
+    content: attr(data-label);
+    font-family: var(--font);
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: block;
+    margin-bottom: 2px;
+  }
+
+  .td-actions {
+    flex-wrap: wrap;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+  }
+
+  .orders-table-wrap {
+    background: transparent;
+    border: none;
+  }
+}
