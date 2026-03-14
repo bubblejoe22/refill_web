@@ -15,6 +15,9 @@ const STEPS = [
 const STEP_INDEX = { pending: 0, processing: 1, shipped: 2, delivered: 3 }
 const CANCELLABLE_STATUSES = ['pending', 'processing']
 
+// Orders can only be cancelled before they're shipped
+const CANCELLABLE_STATUSES = ['pending', 'processing']
+
 export default function TrackPage({ navigate, orderId, order: passedOrder }) {
   const { orders, refreshOrders } = useOrders()
   const [order, setOrder]               = useState(passedOrder || null)
@@ -224,12 +227,18 @@ export default function TrackPage({ navigate, orderId, order: passedOrder }) {
                       <p>Are you sure you want to cancel this order?</p>
                       {cancelError && <p className="cancel-error">{cancelError}</p>}
                       <div className="cancel-confirm-actions">
-                        <button className="btn-cancel-confirm" onClick={handleCancelOrder} disabled={cancelling}>
+                        <button
+                          className="btn-cancel-confirm"
+                          onClick={handleCancelOrder}
+                          disabled={cancelling}
+                        >
                           {cancelling ? 'Cancelling…' : 'Yes, Cancel'}
                         </button>
-                        <button className="btn-cancel-dismiss"
+                        <button
+                          className="btn-cancel-dismiss"
                           onClick={() => { setConfirmCancel(false); setCancelError(null) }}
-                          disabled={cancelling}>
+                          disabled={cancelling}
+                        >
                           Keep Order
                         </button>
                       </div>

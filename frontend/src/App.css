@@ -32,7 +32,7 @@ body { color: var(--text); font-family: var(--body-font); font-size: 14px; line-
   grid-template-rows: var(--header-h) 1fr;
   grid-template-areas: "sidebar header" "sidebar main";
   min-height: 100vh;
-  background-color: #fff;
+  background-color: var(--bg);
 }
 
 /* Sidebar */
@@ -540,60 +540,117 @@ body { color: var(--text); font-family: var(--body-font); font-size: 14px; line-
 .btn-cancel-dismiss:disabled { opacity: 0.6; cursor: not-allowed; }
 
 /* ════════════════════════════════════════
-   PROFILE PAGE
+   PROFILE PAGE 
 ════════════════════════════════════════ */
-.profile-layout { display: grid; grid-template-columns: 300px 1fr; gap: 24px; align-items: start; }
-.profile-left   { display: flex; flex-direction: column; gap: 16px; }
+
+.profile-layout {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 30px;
+  padding: 20px;
+  align-items: start;
+}
+
+/* Sidebar Profile Card */
 .profile-card {
-  background: linear-gradient(160deg, var(--blue-deep), var(--blue-mid));
-  border-radius: var(--radius); padding: 32px 24px; text-align: center;
+  background: linear-gradient(135deg, var(--blue-deep), var(--blue-mid));
+  border-radius: var(--radius);
+  padding: 40px 20px;
+  text-align: center;
+  color: white;
+  position: relative;
+  overflow: hidden;
 }
+
+.avatar-wrapper { margin-bottom: 15px; }
 .profile-avatar-lg {
-  width: 80px; height: 80px; border-radius: 50%;
-  background: rgba(255,255,255,0.2); border: 3px solid rgba(255,255,255,0.35);
-  display: flex; align-items: center; justify-content: center;
-  font-family: var(--font); font-size: 28px; font-weight: 800; color: #fff;
-  margin: 0 auto 14px;
+  width: 90px; height: 90px;
+  border-radius: 50%;
+  border: 4px solid rgba(255,255,255,0.2);
+  background: white;
 }
-.profile-name { font-family: var(--font); font-size: 20px; font-weight: 800; color: #fff; margin-bottom: 6px; }
-.profile-loc  { font-size: 13px; color: rgba(255,255,255,0.7); }
-.staff-badge  { margin-top: 8px; display: inline-block; background: rgba(255,255,255,0.2); color: #fff; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 6px; }
 
+.avatar-selector {
+  display: flex; justify-content: center; gap: 8px; margin-top: 10px;
+}
+.avatar-selector button {
+  background: rgba(255,255,255,0.2);
+  border: none; color: white; border-radius: 4px; padding: 2px 8px; cursor: pointer; font-size: 10px;
+}
+
+.user-type-badge {
+  display: inline-block;
+  background: rgba(255,255,255,0.15);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+/* Sidebar Stats & Links */
 .profile-stats-card {
-  background: var(--surface); border: 1.5px solid var(--border);
-  border-radius: var(--radius); padding: 10px 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-top: 20px;
+  padding: 10px;
 }
-.pstat { padding: 12px 0; border-bottom: 1px solid var(--border); }
-.pstat:last-child { border-bottom: none; }
-.pstat-val   { font-family: var(--font); font-size: 20px; font-weight: 800; color: var(--blue-deep); margin-bottom: 3px; }
-.pstat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
-.pstat-divider { display: none; }
 
-.profile-section-title {
-  font-family: var(--font); font-size: 12px; font-weight: 700;
-  color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 10px;
+.pstat { padding: 15px; text-align: center; border-bottom: 1px solid var(--border); }
+.pstat-val { font-size: 24px; font-weight: 800; color: var(--blue-deep); }
+.pstat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; }
+
+.sidebar-btn {
+  width: 100%; padding: 12px; border: none; background: none;
+  text-align: left; font-size: 14px; color: var(--text);
+  cursor: pointer; border-bottom: 1px solid var(--border);
 }
+.sidebar-btn:hover { background: var(--bg); }
+
+/* Right Section Cards */
 .profile-info-card {
-  background: var(--surface); border: 1.5px solid var(--border);
-  border-radius: var(--radius); padding: 20px;
-  display: flex; flex-direction: column; gap: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
 }
-.pi-row { display: flex; justify-content: space-between; font-size: 14px; padding: 8px 0; border-bottom: 1px solid var(--border); }
-.pi-row:last-of-type { border-bottom: none; }
-.pi-row span { color: var(--muted); }
-.pi-row strong { color: var(--text); font-family: var(--font); }
 
-.profile-menu { background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius); overflow: hidden; }
-.profile-menu-item {
-  display: flex; justify-content: space-between; align-items: center;
-  width: 100%; padding: 15px 20px; border: none; border-bottom: 1px solid var(--border);
-  background: transparent; font-family: var(--body-font); font-size: 14px; color: var(--text);
-  cursor: pointer; text-align: left; transition: background 0.15s;
+.pi-row {
+  display: flex; justify-content: space-between;
+  padding: 12px 0; border-bottom: 1px solid var(--border);
 }
-.profile-menu-item:last-child { border-bottom: none; }
-.profile-menu-item:hover { background: var(--bg); }
-.chevron  { color: var(--muted); font-size: 18px; }
-.signout  { color: var(--danger) !important; }
+.pi-row span { color: var(--muted); font-size: 14px; }
+
+/* Address Management */
+.address-container { margin-top: 20px; }
+.sub-label { font-weight: 700; font-size: 13px; color: var(--text); margin-bottom: 10px; }
+.addr-pill {
+  background: var(--bg); border: 1px solid var(--border);
+  padding: 12px; border-radius: 8px; margin-bottom: 8px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.addr-pill.is-default { border-color: var(--blue-mid); background: #f0f4ff; }
+.addr-actions button {
+  background: none; border: none; font-size: 11px; color: var(--blue-mid);
+  cursor: pointer; margin-left: 10px; text-decoration: underline;
+}
+.add-addr-btn {
+  background-color: #608BC1;
+  border: none;
+}
+.addr-actions .del-btn { color: var(--danger); }
+
+/* Settings Menu */
+.profile-menu { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.profile-menu-item {
+  display: flex; justify-content: space-between; width: 100%;
+  padding: 15px 20px; border: none; border-bottom: 1px solid var(--border);
+  background: white; cursor: pointer; font-size: 14px;
+}
+.profile-menu-item.no-click { cursor: default; }
+.danger-item { color: var(--danger); }
+.inline-select { border: 1px solid var(--border); border-radius: 4px; padding: 2px 5px; }
 
 /* ════════════════════════════════════════
    SHARED COMPONENTS

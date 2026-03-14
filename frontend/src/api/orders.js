@@ -39,6 +39,7 @@ export const ordersAPI = {
   hide: (id) => {
     return apiClient.post(`/orders/${id}/hide/`)
   },
+}
 
   // Items sub-resource — maps to /api/orders/{order_pk}/items/
   items: {

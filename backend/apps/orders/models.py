@@ -43,6 +43,7 @@ class Order(models.Model):
     is_hidden_by_user = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    is_hidden_by_user = models.BooleanField(default=False)
 
     class Meta:
         ordering = ['-created_at']
