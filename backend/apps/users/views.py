@@ -1,13 +1,12 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, status
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
-from .models import UserProfile
-from .serializers import UserSerializer, UserProfileSerializer
-
+from .models import UserProfile, UserAddress
+from .serializers import UserSerializer, UserProfileSerializer, UserAddressSerializer
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
@@ -19,39 +18,126 @@ class UserViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(request.user)
         return Response(serializer.data)
 
-
 class UserProfileViewSet(viewsets.ModelViewSet):
     queryset = UserProfile.objects.all()
     serializer_class = UserProfileSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        user = self.request.user
-        if user.is_staff:
-            return UserProfile.objects.all()
-        return UserProfile.objects.filter(user=user)
+        return self.queryset.filter(user=self.request.user)
 
-    @action(detail=False, methods=['get'])
-    def my_profile(self, request):
+    @action(detail=False, methods=['get', 'patch'])
+    def me(self, request):
+        profile, created = UserProfile.objects.get_or_create(user=request.user)
+        
+        if request.method == 'PATCH':
+            # --- USER DATA UPDATES ---
+            user = request.user
+            user_updated = False
+            if 'name' in request.data:
+                user.username = request.data['name']
+                user_updated = True
+            if 'email' in request.data:
+                user.email = request.data['email']
+                user_updated = True
+            if user_updated:
+                user.save()
+
+            # --- ONE-TIME POINT LOGIC ---
+            if 'points' in request.data:
+                new_points_request = float(request.data.get('points', 0))
+                
+                # Logic: If they are rating the APP
+                if 'app_rating' in request.data and profile.app_rating == 0:
+                    # User hasn't rated before, allow adding 1.0 point
+                    profile.points += 1.0
+                
+                # Logic: If they are rating a STATION
+                # (Assumes you pass a flag or check against a list of rated stations)
+                # For a simple 'one-time' bonus for the first station:
+                elif 'station_rating' in request.data and profile.station_rating == 0:
+                    profile.points += 0.2
+                
+                # IMPORTANT: Remove 'points' from request.data so the serializer 
+                # doesn't overwrite the manual addition above
+                request.data.pop('points')
+
+            serializer = UserProfileSerializer(profile, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        # --- GET LOGIC (CALCULATE ORDER POINTS ON THE FLY) ---
+        # This ensures the 0.1 per order is always reflected when they load the page
+        serializer = UserProfileSerializer(profile)
+        data = serializer.data
+        
+        # Calculate extra points from orders dynamically
+        # This assumes you have an Order model linked to the user
+        from apps.orders.models import Order 
+        delivered_orders = Order.objects.filter(
+            user=request.user, 
+            status__in=['delivered', 'completed', 'Delivered', 'Completed']
+        )
+        
+        order_points = 0
+        for order in delivered_orders:
+            # 0.1 per order + 0.1 per gallon (if gallon info exists on Order model)
+            gallons = getattr(order, 'gallons', 0)
+            order_points += (float(gallons) * 0.1) + 0.1
+            
+        data['points'] = float(profile.points) + order_points
+        return Response(data)
+
+    @action(detail=False, methods=['post'])
+    def add_address(self, request):
+        profile, _ = UserProfile.objects.get_or_create(user=request.user)
+        serializer = UserAddressSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(profile=profile)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    @action(detail=False, methods=['delete'], url_path='remove_address/(?P<address_id>[0-9]+)')
+    def remove_address(self, request, address_id=None):
         try:
-            profile = request.user.profile
-            serializer = self.get_serializer(profile)
-            return Response(serializer.data)
-        except UserProfile.DoesNotExist:
-            return Response({'detail': 'Profile not found'}, status=404)
+            # Ensure the address belongs to the current user's profile
+            address = UserAddress.objects.get(id=address_id, profile__user=request.user)
+            address.delete()
+            return Response({"success": "Address removed"}, status=status.HTTP_200_OK)
+        except UserAddress.DoesNotExist:
+            return Response({"error": "Address not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+    @action(detail=False, methods=['patch'], url_path='set_default_address/(?P<address_id>[0-9]+)')
+    def set_default_address(self, request, address_id=None):
+        try:
+            # Ensure the address belongs to the current user
+            address = UserAddress.objects.get(id=address_id, profile__user=request.user)
+            
+            # Set to true. Your models.py save() method will auto-change the others to false!
+            address.is_default = True
+            address.save() 
+            
+            return Response({"success": "Default address updated"}, status=status.HTTP_200_OK)
+        except UserAddress.DoesNotExist:
+            return Response({"error": "Address not found"}, status=status.HTTP_404_NOT_FOUND)
 
+    @action(detail=False, methods=['post'])
+    def deactivate(self, request):
+        user = request.user
+        user.is_active = False 
+        user.save()
+        return Response({"success": "Account deactivated"}, status=status.HTTP_200_OK)
 
-# ── Auth endpoints ────────────────────────────────────────────────────────────
-
+# --- Auth endpoints ---
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def login_view(request):
     username = request.data.get('username')
     password = request.data.get('password')
-
     if not username or not password:
         return Response({'error': 'Username and password required'}, status=400)
-
     user = authenticate(username=username, password=password)
     if user:
         token, _ = Token.objects.get_or_create(user=user)
@@ -62,7 +148,6 @@ def login_view(request):
             'is_staff': user.is_staff,
         })
     return Response({'error': 'Invalid credentials'}, status=400)
-
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
