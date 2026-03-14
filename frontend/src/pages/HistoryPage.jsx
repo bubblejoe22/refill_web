@@ -1,3 +1,4 @@
+import { useState } from 'react'
 // =============================================================
 // HistoryPage.jsx
 // =============================================================
@@ -12,6 +13,7 @@
 // =============================================================
 
 import { useOrders } from '../context/OrdersContext'
+import { ordersAPI } from '../api/orders'
 
 const fmt = (n) => `₱${Number(n).toLocaleString()}`
 
@@ -25,6 +27,8 @@ const STATUS_COLOR = {
 
 export default function HistoryPage({ navigate }) {
   const { orders, loading, fetchOrders } = useOrders()
+  const [confirmHideId, setConfirmHideId] = useState(null)
+  const [hiding, setHiding] = useState(false)
 
   const getStyle = (status) =>
     STATUS_COLOR[status?.toLowerCase()] || { bg: '#f1f5f9', color: '#64748b' }
@@ -33,6 +37,19 @@ export default function HistoryPage({ navigate }) {
   // order.order_notes is the nested array from OrderSerializer
   const noteCount = (order) =>
     Array.isArray(order.order_notes) ? order.order_notes.length : 0
+
+  const handleHide = async (id) => {
+    setHiding(true)
+    try {
+      await ordersAPI.hide(id)
+      await fetchOrders()
+    } catch (e) {
+      // silently fail — order stays visible
+    } finally {
+      setHiding(false)
+      setConfirmHideId(null)
+    }
+  }
 
   return (
     <div>
@@ -67,6 +84,8 @@ export default function HistoryPage({ navigate }) {
             </thead>
             <tbody>
               {orders.map(o => {
+                const s = getStyle(o.status)
+                const isConfirming = confirmHideId === o.id
                 const s     = getStyle(o.status)
                 const nCount = noteCount(o)
                 return (
@@ -106,6 +125,35 @@ export default function HistoryPage({ navigate }) {
                         </button>
                       )}
                       <button className="reorder-btn" onClick={() => navigate('browse')}>↻ Reorder</button>
+
+                      {/* Hide button — only for completed/cancelled orders */}
+                      {['delivered', 'cancelled'].includes(o.status?.toLowerCase()) && (
+                        isConfirming ? (
+                          <>
+                            <button
+                              className="reorder-btn hide-confirm-btn"
+                              onClick={() => handleHide(o.id)}
+                              disabled={hiding}
+                            >
+                              {hiding ? '…' : 'Delete'}
+                            </button>
+                            <button
+                              className="reorder-btn"
+                              onClick={() => setConfirmHideId(null)}
+                              disabled={hiding}
+                            >
+                              Keep
+                            </button>
+                          </>
+                        ) : (
+                          <button
+                            className="reorder-btn hide-btn"
+                            onClick={() => setConfirmHideId(o.id)}
+                          >
+                            ✕ Delete
+                          </button>
+                        )
+                      )}
                     </td>
                   </tr>
                 )

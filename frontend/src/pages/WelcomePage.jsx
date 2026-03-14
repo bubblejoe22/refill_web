@@ -1,24 +1,46 @@
+import React from 'react';
+import '../styles/WelcomePageStyle.css';
+import logo from '../assets/logo.png';
+
 export default function WelcomePage({ navigate }) {
   return (
-    <div className="welcome-screen">
-      <div className="welcome-bg" />
-      <div className="welcome-content">
-        <div className="welcome-logo">💧</div>
-        <h1 className="welcome-title">Refill on Wheels</h1>
-        <p className="welcome-tagline">Fresh water delivered to your door.<br />Fast, affordable, and reliable.</p>
+    <div className="fullscreen-welcome-container">
+      <div className="welcome-overlay">
+        
+        <div className="welcome-content-centered">
+          
+          <div className="brand-header-centered">
+            <img src={logo} alt="Refill on Wheels Logo" className="fullscreen-logo-centered" />
+            <h2 className="brand-name-centered">REFILL ON WHEELS</h2>
+          </div>
 
-        <div className="welcome-features">
-          <div className="wf-item"><span>📍</span><span>Find nearby stations</span></div>
-          <div className="wf-item"><span>⚡</span><span>Order in minutes</span></div>
-          <div className="wf-item"><span>📅</span><span>Schedule deliveries</span></div>
-          <div className="wf-item"><span>🔄</span><span>Track your order live</span></div>
+          <h1 className="fullscreen-title-centered">
+            Your Ultimate Water Delivery Solution
+          </h1>
+          
+          <p className="fullscreen-subtitle-centered">
+            "Order easily, track delivery, and stay hydrated."
+          </p>
+
+          <div className="fullscreen-btn-group-vertical">
+            <button 
+              className="btn-get-started-wide" 
+              onClick={() => navigate('register')}
+            >
+              GET STARTED
+            </button>
+            
+            <button 
+              className="btn-login-outline-wide" 
+              onClick={() => navigate('login')}
+            >
+              LOG IN
+            </button>
+          </div>
+
         </div>
 
-        <div className="welcome-actions">
-          <button className="btn-primary full" onClick={() => navigate('login')}>Sign In</button>
-          <button className="btn-ghost full"    onClick={() => navigate('register')}>Create Account</button>
-        </div>
       </div>
     </div>
-  )
+  );
 }

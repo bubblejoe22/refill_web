@@ -126,6 +126,7 @@ class OrderViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        return Response(OrderSerializer(order).data, status=status.HTTP_201_CREATED)
         order.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
