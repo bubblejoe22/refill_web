@@ -1,7 +1,3 @@
-// =============================================================
-// TrackPage.jsx
-// =============================================================
-
 import { useState, useEffect } from 'react'
 import { useOrders } from '../context/OrdersContext'
 import { ordersAPI } from '../api/orders'
@@ -13,9 +9,6 @@ const STEPS = [
   { id: 'delivered',  icon: '✅', label: 'Delivered',        desc: 'Order successfully delivered' },
 ]
 const STEP_INDEX = { pending: 0, processing: 1, shipped: 2, delivered: 3 }
-const CANCELLABLE_STATUSES = ['pending', 'processing']
-
-// Orders can only be cancelled before they're shipped
 const CANCELLABLE_STATUSES = ['pending', 'processing']
 
 export default function TrackPage({ navigate, orderId, order: passedOrder }) {
@@ -108,10 +101,8 @@ export default function TrackPage({ navigate, orderId, order: passedOrder }) {
   const isCancelled   = order?.status?.toLowerCase() === 'cancelled'
   const isCancellable = CANCELLABLE_STATUSES.includes(order?.status?.toLowerCase())
 
-  // ✅ total_price is computed server-side by Django's compute_total() from OrderItems
   const displayTotal = order?.total_price ?? 0
 
-  // ✅ qty comes from summing the items array (Django doesn't store qty on the order itself)
   const displayQty = order?.items?.length > 0
     ? order.items.reduce((sum, item) => sum + (item.quantity ?? 0), 0)
     : (order?.qty ?? '—')
@@ -155,7 +146,6 @@ export default function TrackPage({ navigate, orderId, order: passedOrder }) {
             </div>
             <div className="track-order-meta">
               <span>📅 {order.date || order.created_at?.slice(0, 10) || '—'}</span>
-              {/* ✅ qty summed from items; total from total_price */}
               <span>💧 {displayQty !== '—' ? `${displayQty} gal` : '—'}</span>
               <span>₱{Number(displayTotal).toLocaleString()}</span>
             </div>

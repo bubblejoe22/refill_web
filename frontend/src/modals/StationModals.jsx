@@ -1,29 +1,7 @@
-// =============================================================
-// StationModal.jsx  — NEW FILE → src/components/StationModal.jsx
-// =============================================================
-// Opens when user clicks a station name in BrowsePage.
-//
-// SHOWS:
-//   Station name, emoji, open status, rating summary, water types,
-//   pricing, delivery fee, ETA, location, hours
-//
-// REVIEWS CRUD:
-//   READ   → GET    /api/products/stations/{id}/reviews/
-//   CREATE → POST   /api/products/stations/{id}/reviews/
-//   UPDATE → PATCH  /api/products/stations/{id}/reviews/{reviewId}/
-//   DELETE → DELETE /api/products/stations/{id}/reviews/{reviewId}/
-//
-// FORM VALIDATION:
-//   - Rating required (1–5 stars)
-//   - Comment optional, max 500 chars
-// =============================================================
-
 import { useState, useEffect } from 'react'
 import apiClient from '../api/client'
 import "./StationModalsStyle.css"
 
-
-// ── Reviews API (products app) ────────────────────────────────
 const reviewsAPI = {
   getAll: (stationId)                 => apiClient.get(`/products/stations/${stationId}/reviews/`),
   create: (stationId, data)           => apiClient.post(`/products/stations/${stationId}/reviews/`, data),
@@ -31,7 +9,6 @@ const reviewsAPI = {
   delete: (stationId, reviewId)       => apiClient.delete(`/products/stations/${stationId}/reviews/${reviewId}/`),
 }
 
-// ── Star row ──────────────────────────────────────────────────
 function Stars({ value = 0, interactive = false, onChange }) {
   const [hovered, setHovered] = useState(0)
   const active = hovered || value
@@ -53,21 +30,16 @@ function Stars({ value = 0, interactive = false, onChange }) {
 export default function StationModal({ station, onClose, onOrder, onSchedule }) {
   const [reviews,      setReviews]      = useState([])
   const [loadingRevs,  setLoadingRevs]  = useState(false)
-
-  // ADD REVIEW form state
   const [newRating,    setNewRating]    = useState(0)
   const [newComment,   setNewComment]   = useState('')
   const [addErrors,    setAddErrors]    = useState({})
   const [addBusy,      setAddBusy]      = useState(false)
-
-  // EDIT REVIEW inline state
   const [editId,       setEditId]       = useState(null)
   const [editRating,   setEditRating]   = useState(0)
   const [editComment,  setEditComment]  = useState('')
   const [editErrors,   setEditErrors]   = useState({})
   const [editBusy,     setEditBusy]     = useState(false)
 
-  // ── CRUD: READ — load reviews when modal opens ───────────────
   useEffect(() => {
     if (!station?.id) return
     setLoadingRevs(true)
@@ -77,15 +49,12 @@ export default function StationModal({ station, onClose, onOrder, onSchedule }) 
       .finally(() => setLoadingRevs(false))
   }, [station?.id])
 
-  // Close on clicking the dark backdrop
   const onBackdrop = (e) => { if (e.target === e.currentTarget) onClose() }
 
-  // Average rating from fetched reviews, falls back to station.rating
   const avg = reviews.length
     ? (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length).toFixed(1)
     : station.rating
 
-  // ── FORM VALIDATION ───────────────────────────────────────────
   const validate = (rating, comment, setErr) => {
     const e = {}
     if (!rating || rating < 1)    e.rating  = 'Please pick a star rating.'
@@ -93,8 +62,6 @@ export default function StationModal({ station, onClose, onOrder, onSchedule }) 
     setErr(e)
     return Object.keys(e).length === 0
   }
-
-  // ── CRUD: CREATE — submit new review ─────────────────────────
   const handleAdd = async () => {
     if (!validate(newRating, newComment, setAddErrors)) return
     setAddBusy(true)
@@ -108,7 +75,6 @@ export default function StationModal({ station, onClose, onOrder, onSchedule }) 
     } finally { setAddBusy(false) }
   }
 
-  // ── CRUD: UPDATE — save edited review ────────────────────────
   const handleSaveEdit = async () => {
     if (!validate(editRating, editComment, setEditErrors)) return
     setEditBusy(true)
@@ -122,7 +88,6 @@ export default function StationModal({ station, onClose, onOrder, onSchedule }) 
     } finally { setEditBusy(false) }
   }
 
-  // ── CRUD: DELETE — remove review ─────────────────────────────
   const handleDelete = async (reviewId) => {
     if (!window.confirm('Delete your review?')) return
     try {
@@ -212,9 +177,6 @@ export default function StationModal({ station, onClose, onOrder, onSchedule }) 
             </button>
           </div>
 
-          {/* ════════════════════════════════════════════════════════
-              REVIEWS SECTION
-          ════════════════════════════════════════════════════════ */}
           <div className="smodal-reviews-section">
             <h3 className="smodal-reviews-title">Customer Reviews</h3>
 

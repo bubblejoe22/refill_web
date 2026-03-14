@@ -7,14 +7,12 @@ const apiClient = axios.create({
   headers: { 'Content-Type': 'application/json' },
 })
 
-// Attach token to every request
 apiClient.interceptors.request.use(config => {
   const token = localStorage.getItem('authToken')
   if (token) config.headers['Authorization'] = `Token ${token}`
   return config
 })
 
-// Handle 401 Unauthorized globally
 apiClient.interceptors.response.use(
   response => response,
   error => {

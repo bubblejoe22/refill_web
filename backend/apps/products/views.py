@@ -43,11 +43,9 @@ class StationReviewViewSet(viewsets.ModelViewSet):
         except Product.DoesNotExist:
             raise NotFound("Station not found.")
 
-    # CRUD: READ
     def get_queryset(self):
         return StationReview.objects.filter(station=self._get_station())
 
-    # CRUD: CREATE
     def perform_create(self, serializer):
         station = self._get_station()
         if StationReview.objects.filter(station=station, author=self.request.user).exists():
@@ -57,7 +55,6 @@ class StationReviewViewSet(viewsets.ModelViewSet):
             )
         serializer.save(station=station, author=self.request.user)
 
-    # CRUD: UPDATE — only own review
     def partial_update(self, request, *args, **kwargs):
         review = self.get_object()
         if review.author != request.user:
@@ -67,7 +64,6 @@ class StationReviewViewSet(viewsets.ModelViewSet):
         serializer.save()
         return Response(serializer.data)
 
-    # CRUD: DELETE — only own review (staff can delete any)
     def destroy(self, request, *args, **kwargs):
         review = self.get_object()
         if review.author != request.user and not request.user.is_staff:

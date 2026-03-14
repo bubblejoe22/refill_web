@@ -1,8 +1,3 @@
-// SchedulePage.jsx
-// CRUD: CREATE order → POST /api/orders/
-// CRUD: CREATE item  → POST /api/orders/{id}/items/
-// CRUD: CREATE note  → POST /api/orders/{id}/notes/
-
 import { useState, useEffect } from 'react'
 import { useOrders } from '../context/OrdersContext'
 import { productsAPI } from '../api/products'
@@ -102,7 +97,6 @@ export default function SchedulePage({ navigate, station: initialStation }) {
     if (!validate()) return
     setLoading(true); setErrors({})
 
-    // Step 1: Create the order
     const result = await createOrder({
       shipping_address: form.address,
       status:           'pending',
@@ -117,7 +111,6 @@ export default function SchedulePage({ navigate, station: initialStation }) {
 
     const newOrderId = result.data.id
 
-    // Step 2: Create order item separately so Django computes total_price
     try {
       await ordersAPI.items.create(newOrderId, {
         product_id: station.id,
@@ -126,10 +119,8 @@ export default function SchedulePage({ navigate, station: initialStation }) {
       })
     } catch (err) {
       console.warn('Item creation failed:', err.response?.data)
-      // Schedule was still created — don't block the user
     }
 
-    // Step 3: Save optional note
     if (noteText.trim()) {
       try { await ordersAPI.notes.create(newOrderId, { content: noteText.trim(), note_type: 'customer' }) }
       catch { console.warn('Note save failed, scheduled order was placed.') }
@@ -140,7 +131,6 @@ export default function SchedulePage({ navigate, station: initialStation }) {
 
   const freqLabel = FREQUENCIES.find(f => f.id === form.frequency)?.label.toLowerCase()
 
-  /* ── Success ── */
   if (done) return (
     <div className="op-page">
       <div className="op-card">
@@ -175,7 +165,6 @@ export default function SchedulePage({ navigate, station: initialStation }) {
     </div>
   )
 
-  /* ── Station picker ── */
   if (!station) return (
     <div className="op-page">
       <div className="op-card">
@@ -230,7 +219,6 @@ export default function SchedulePage({ navigate, station: initialStation }) {
     </div>
   )
 
-  /* ── Main schedule form ── */
   return (
     <div className="op-page">
       <div className="op-card">

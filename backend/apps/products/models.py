@@ -44,17 +44,16 @@ class StationReview(models.Model):
     author = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='station_reviews'
     )
-    # Validated 1–5 at model level and again in serializer
     rating = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(5)]
     )
-    comment    = models.TextField(blank=True)   # optional — max 500 chars enforced in serializer
+    comment    = models.TextField(blank=True)  
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ['-created_at']
-        unique_together = [('station', 'author')]   # one review per user per station
+        unique_together = [('station', 'author')]  
 
     def __str__(self):
         return f"{self.author.username} → {self.station.name} ({self.rating}★)"

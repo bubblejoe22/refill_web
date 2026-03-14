@@ -21,12 +21,10 @@ export default function RegisterPage({ navigate }) {
         username: form.username,
         email: form.email,
         password: form.password,
-        re_password: form.confirm, // Djoser requires re_password
+        re_password: form.confirm, 
       })
 
-      // Auto-login after successful registration
-      await login(form.username, form.password)
-      navigate('home')
+      navigate('login', { message: "Account created successfully. Please login." })
     } catch (e) {
       const data = e.response?.data
       if (data?.username) setError(`Username: ${data.username[0]}`)

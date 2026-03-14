@@ -5,14 +5,12 @@ class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     phone = models.CharField(max_length=20, blank=True)
     
-    # Core Profile Settings
     payment_method = models.CharField(max_length=20, default='COD')
     avatar_seed = models.CharField(max_length=50, default='', blank=True)
     avatar_type = models.CharField(max_length=20, default='initials')
     sms_notifications = models.BooleanField(default=True)
     email_notifications = models.BooleanField(default=True)
     
-    # Points & Ratings (The Memory Fix)
     points = models.FloatField(default=0.0)
     app_rating = models.IntegerField(default=0)
     rated_stations = models.JSONField(default=list, blank=True, null=True)
@@ -32,7 +30,6 @@ class UserAddress(models.Model):
     is_default = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
-        # Logic to ensure only one address is "Default" per profile
         if self.is_default:
             UserAddress.objects.filter(profile=self.profile, is_default=True).update(is_default=False)
         super().save(*args, **kwargs)

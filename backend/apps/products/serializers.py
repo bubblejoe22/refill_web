@@ -19,9 +19,7 @@ class ProductSerializer(serializers.ModelSerializer):
 
 
 class StationReviewSerializer(serializers.ModelSerializer):
-    # Exposed to frontend so review cards can show the author's name
     author_username = serializers.CharField(source='author.username', read_only=True)
-    # Frontend uses this flag to show Edit / Delete only on the user's own reviews
     is_own = serializers.SerializerMethodField()
 
     class Meta:

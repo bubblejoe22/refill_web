@@ -1,17 +1,4 @@
 import { useState } from 'react'
-// =============================================================
-// HistoryPage.jsx
-// =============================================================
-// Shows the order history table.
-//
-// ORDER NOTES reflected here:
-//   Each order row shows a 📝 badge with the note count.
-//   The count comes from order.order_notes[] which is nested
-//   inside the OrderSerializer response (read_only).
-//   Clicking "📍 Track" navigates to TrackPage where the full
-//   notes CRUD panel is available.
-// =============================================================
-
 import { useOrders } from '../context/OrdersContext'
 import { ordersAPI } from '../api/orders'
 
@@ -33,8 +20,6 @@ export default function HistoryPage({ navigate }) {
   const getStyle = (status) =>
     STATUS_COLOR[status?.toLowerCase()] || { bg: '#f1f5f9', color: '#64748b' }
 
-  // ORDER NOTES — count how many notes are on an order
-  // order.order_notes is the nested array from OrderSerializer
   const noteCount = (order) =>
     Array.isArray(order.order_notes) ? order.order_notes.length : 0
 
@@ -44,7 +29,6 @@ export default function HistoryPage({ navigate }) {
       await ordersAPI.hide(id)
       await fetchOrders()
     } catch (e) {
-      // silently fail — order stays visible
     } finally {
       setHiding(false)
       setConfirmHideId(null)
@@ -84,7 +68,6 @@ export default function HistoryPage({ navigate }) {
             </thead>
             <tbody>
               {orders.map(o => {
-                const s = getStyle(o.status)
                 const isConfirming = confirmHideId === o.id
                 const s     = getStyle(o.status)
                 const nCount = noteCount(o)
@@ -101,10 +84,6 @@ export default function HistoryPage({ navigate }) {
                       </span>
                     </td>
 
-                    {/* ORDER NOTE count badge
-                        - Shows 📝 with the number of notes on this order
-                        - Clicking navigates to TrackPage where notes can be managed
-                        - Notes added in OrderPage/SchedulePage appear here */}
                     <td className="td-notes">
                       {nCount > 0 ? (
                         <button

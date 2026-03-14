@@ -20,7 +20,7 @@ export default function AppShell({ page, navigate, children }) {
   const initials = user?.username?.slice(0, 2).toUpperCase() || 'U'
 
   const handleBell = () => {
-    fetchNotifications()   // refresh on open
+    fetchNotifications()   
     setShowNotifs(v => !v)
   }
 

@@ -39,7 +39,6 @@ const ProfilePage = ({ navigate }) => {
     const [stationRatingsMap, setStationRatingsMap] = useState({});
     const [settings, setSettings] = useState({ sms: true, email: true });
 
-    // Helper function to process backend data into state
     const updateLocalState = (data) => {
         setAccountData({
             name: data.user_details?.username || '',
@@ -59,20 +58,17 @@ const ProfilePage = ({ navigate }) => {
         const startIdx = loadedType === 'initials' ? 0 : AVATAR_SEEDS.indexOf(loadedSeed);
         setTempIndex(startIdx === -1 ? 0 : startIdx);
 
-        // Map backend ratings to frontend UI
         setRatings({ app: data.app_rating || 0 });
-        
-        // Convert the backend array of rated station IDs into a map for the UI
+
         const sMap = {};
         if (data.rated_stations) {
-            data.rated_stations.forEach(id => { sMap[id] = 5; }); // Assume 5 stars for UI if rated
+            data.rated_stations.forEach(id => { sMap[id] = 5; });
         }
         setStationRatingsMap(sMap);
         
         setSettings({ sms: data.sms_notifications ?? true, email: data.email_notifications ?? true });
     };
 
-    // 1. FETCH DATA ON LOAD
     useEffect(() => {
         const fetchProfileData = async () => {
             try {
@@ -83,7 +79,6 @@ const ProfilePage = ({ navigate }) => {
         fetchProfileData();
     }, []);
 
-    // --- AVATAR ARROW HANDLERS ---
     const handleNextAvatar = () => setTempIndex((prev) => (prev + 1) % AVATAR_SEEDS.length);
     const handlePrevAvatar = () => setTempIndex((prev) => (prev - 1 + AVATAR_SEEDS.length) % AVATAR_SEEDS.length);
 
@@ -104,7 +99,6 @@ const ProfilePage = ({ navigate }) => {
     const hasChanged = (AVATAR_SEEDS[tempIndex] !== savedAvatar.seed) && 
                      !(AVATAR_SEEDS[tempIndex] === 'initials' && savedAvatar.type === 'initials');
 
-    // --- ACCOUNT HANDLERS ---
     const handleSaveAccount = async () => {
         try {
             await apiClient.patch('/users/profiles/me/', {
@@ -172,14 +166,11 @@ const ProfilePage = ({ navigate }) => {
         }
     };
 
-    // --- RATING LOGIC ---
     const handleSaveAppRating = async (ratingVal) => {
         try { 
-            // 1. Send the rating to the backend
+
             await apiClient.patch('/users/profiles/me/', { app_rating: ratingVal }); 
             setShowAppReviewModal(false);
-            
-            // 2. Fetch fresh profile data to get the newly calculated points!
             const res = await apiClient.get('/users/profiles/me/');
             updateLocalState(res.data);
             
@@ -190,10 +181,8 @@ const ProfilePage = ({ navigate }) => {
 
     const handleSaveStationRating = async (stationId, ratingVal) => {
         try {
-            // 1. Send the specific station ID to the backend
             await apiClient.patch('/users/profiles/me/', { rated_station_id: stationId, station_rating: ratingVal });
-            
-            // 2. Fetch fresh profile data
+
             const res = await apiClient.get('/users/profiles/me/');
             updateLocalState(res.data);
             
@@ -203,11 +192,8 @@ const ProfilePage = ({ navigate }) => {
 
     return (
         <div className="profile-layout">
-            {/* LEFT SIDEBAR */}
             <div className="profile-left">
                 <div className="profile-card">
-                    
-                    {/* AVATAR */}
                     <div className="avatar-selection-wrapper">
                         <button className="nav-arrow" onClick={handlePrevAvatar}>‹</button>
                         

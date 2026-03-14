@@ -1,7 +1,5 @@
 import { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
-
-// Pages
 import WelcomePage    from '../pages/WelcomePage'
 import LoginPage      from '../pages/LoginPage'
 import RegisterPage   from '../pages/RegisterPage'
@@ -13,7 +11,6 @@ import HistoryPage    from '../pages/HistoryPage'
 import TrackPage      from '../pages/TrackPage'
 import ProfilePage    from '../delivered/ProfilePage'
 
-// Layout
 import AppShell from '../components/AppShell'
 
 export default function AppRouter() {
@@ -26,14 +23,12 @@ export default function AppRouter() {
     setPage(to)
   }
 
-  // Public routes (no auth required)
   if (!user) {
     if (page === 'login')    return <LoginPage    navigate={navigate} />
     if (page === 'register') return <RegisterPage navigate={navigate} />
     return <WelcomePage navigate={navigate} />
   }
 
-  // Protected routes
   const SHELL_PAGES = ['home', 'browse', 'history', 'profile', 'track']
 
   if (SHELL_PAGES.includes(page)) {
@@ -48,7 +43,6 @@ export default function AppRouter() {
     )
   }
 
-  // Full-screen pages (no shell)
   if (page === 'order')    return <OrderPage    navigate={navigate} {...pageProps} />
   if (page === 'schedule') return <SchedulePage navigate={navigate} {...pageProps} />
 

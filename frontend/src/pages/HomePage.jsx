@@ -6,22 +6,16 @@ import { FaShoppingCart, FaCalendarAlt, FaHistory, FaTint, FaStar, FaMapMarkerAl
 import StationModal from '../modals/StationModals'
 
 const fmt = (n) => `₱${Number(n).toLocaleString()}`
-
-/**
- * Maps a Product from the API into the station shape
- * that OrderPage, SchedulePage, and StationModal expect.
- */
 const toStation = (product) => ({
   id:             product.id,
   name:           product.name,
   description:    product.description || '',
-  // category name becomes the water type e.g. "Purified" or "Alkaline"
   waterTypes:     product.category ? [product.category] : [],
   pricePerGallon: parseFloat(product.price ?? 0),
-  deliveryFee:    0,          // not in your model yet — set to 0 or add later
-  eta:            '—',        // not in your model yet
-  distance:       '—',        // not in your model yet
-  rating:         null,       // not in your model yet
+  deliveryFee:    0,     
+  eta:            '—',       
+  distance:       '—',    
+  rating:         null,   
   stock:          product.stock ?? 0,
   open:           product.is_active ?? true,
 })
@@ -35,7 +29,6 @@ export default function HomePage({ navigate }) {
   const [stationsError, setStationsError]     = useState(null)
   const [selectedStation, setSelectedStation] = useState(null)
 
-  // ── Fetch all active products and treat each one as a station ────────────
   useEffect(() => {
     const fetchStations = async () => {
       setLoading(true)
@@ -184,18 +177,25 @@ export default function HomePage({ navigate }) {
               <p style={{ color: '#888', fontSize: '0.9rem' }}>No recent orders yet.</p>
             )}
 
-            {recentOrders.map(o => (
-              <div key={o.id} className="order-card">
-                <div>
-                  <strong>{o.station || 'Water Station'}</strong>
-                  <p>{o.qty || 0} gal</p>
+            {recentOrders.map(o => {
+              const label = o.notes || o.shipping_address || 'Water Station'
+              const qty   = Array.isArray(o.items)
+                ? o.items.reduce((sum, item) => sum + (item.quantity || item.qty || 0), 0)
+                : (o.qty || o.quantity || 0)
+              const total = o.total_price || o.total || 0
+              return (
+                <div key={o.id} className="order-card">
+                  <div>
+                    <strong>{label}</strong>
+                    <p>{qty} gal</p>
+                  </div>
+                  <div>
+                    <span>{o.status}</span>
+                    <p>{fmt(total)}</p>
+                  </div>
                 </div>
-                <div>
-                  <span>{o.status}</span>
-                  <p>{fmt(o.total || 0)}</p>
-                </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
 
         </main>

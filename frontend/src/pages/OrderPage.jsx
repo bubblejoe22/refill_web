@@ -1,8 +1,3 @@
-// OrderPage.jsx
-// CRUD: CREATE order → POST /api/orders/
-// CRUD: CREATE item  → POST /api/orders/{id}/items/
-// CRUD: CREATE note  → POST /api/orders/{id}/notes/
-
 import { useState } from 'react'
 import { useOrders } from '../context/OrdersContext'
 import { ordersAPI } from '../api/orders'
@@ -54,7 +49,6 @@ export default function OrderPage({ navigate, station }) {
   const handleConfirm = async () => {
     setLoading(true); setErrors({})
 
-    // Step 1: Create the order
     const result = await createOrder({
       shipping_address: address,
       status:           'pending',
@@ -69,7 +63,6 @@ export default function OrderPage({ navigate, station }) {
 
     const newOrderId = result.data.id
 
-    // Step 2: Create the order item separately so Django computes total_price
     try {
       await ordersAPI.items.create(newOrderId, {
         product_id: station.id,
@@ -78,10 +71,8 @@ export default function OrderPage({ navigate, station }) {
       })
     } catch (err) {
       console.warn('Item creation failed:', err.response?.data)
-      // Order was still placed — don't block the user
     }
 
-    // Step 3: Save optional note
     if (noteText.trim()) {
       try { await ordersAPI.notes.create(newOrderId, { content: noteText.trim(), note_type: 'customer' }) }
       catch { console.warn('Note save failed, order was still placed.') }
@@ -90,7 +81,6 @@ export default function OrderPage({ navigate, station }) {
     setOrderId(newOrderId); setStep(3); setLoading(false)
   }
 
-  /* ── Success screen ── */
   if (step === 3) return (
     <div className="op-page">
       <div className="op-card">

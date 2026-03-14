@@ -31,7 +31,6 @@ class UserProfileViewSet(viewsets.ModelViewSet):
         profile, created = UserProfile.objects.get_or_create(user=request.user)
         
         if request.method == 'PATCH':
-            # --- USER DATA UPDATES ---
             user = request.user
             user_updated = False
             if 'name' in request.data:
@@ -42,31 +41,22 @@ class UserProfileViewSet(viewsets.ModelViewSet):
                 user_updated = True
             if user_updated:
                 user.save()
-
-            # --- RATING & POINT LOGIC ---
-            # 1. App Rating Logic
             if 'app_rating' in request.data:
                 incoming_rating = int(request.data['app_rating'])
-                # Only add 1.0 point if they've never rated before
                 if profile.app_rating == 0 and incoming_rating > 0:
                     profile.points += 1.0
-                profile.app_rating = incoming_rating # Save the stars to DB
+                profile.app_rating = incoming_rating 
                 profile.save()
 
-            # 2. Station Rating Logic
             if 'rated_station_id' in request.data:
                 station_id = int(request.data['rated_station_id'])
-                # Make sure the list exists
                 if profile.rated_stations is None:
                     profile.rated_stations = []
-                
-                # If they haven't rated this specific station yet
                 if station_id not in profile.rated_stations:
-                    profile.rated_stations.append(station_id) # Remember it
-                    profile.points += 0.2                     # Award points
+                    profile.rated_stations.append(station_id) 
+                    profile.points += 0.2                    
                 profile.save()
 
-            # Prevent frontend from manually overriding total points
             if 'points' in request.data:
                 request.data.pop('points')
 
@@ -75,12 +65,10 @@ class UserProfileViewSet(viewsets.ModelViewSet):
                 serializer.save()
                 return Response(serializer.data)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        
-        # --- GET LOGIC (CALCULATE ORDER POINTS ON THE FLY) ---
+
         serializer = UserProfileSerializer(profile)
         data = serializer.data
-        
-        # Calculate extra points from orders dynamically
+
         from apps.orders.models import Order 
         delivered_orders = Order.objects.filter(
             user=request.user, 
@@ -130,7 +118,6 @@ class UserProfileViewSet(viewsets.ModelViewSet):
         user.save()
         return Response({"success": "Account deactivated"}, status=status.HTTP_200_OK)
 
-# --- Auth endpoints ---
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def login_view(request):

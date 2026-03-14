@@ -71,7 +71,7 @@ class OrderViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        order.delete()  # ✅ Fixed: actually deletes the order now
+        order.delete() 
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=True, methods=['post'], url_path='cancel')
@@ -91,7 +91,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         order.save(update_fields=['status'])
         return Response({"message": f"Order #{order.id} cancelled."})
 
-    @action(detail=True, methods=['post'], url_path='hide')  # ✅ Fixed: moved here from OrderNoteViewSet
+    @action(detail=True, methods=['post'], url_path='hide') 
     def hide(self, request, pk=None):
         """Hide an order from the user's history (soft delete)"""
         order = self.get_object()
@@ -202,13 +202,13 @@ class OrderNoteViewSet(viewsets.ModelViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class NotificationViewSet(viewsets.ReadOnlyModelViewSet):
+class NotificationViewSet(viewsets.ModelViewSet):
     serializer_class   = NotificationSerializer
     permission_classes = [IsAuthenticated]
-
+ 
     def get_queryset(self):
         return Notification.objects.filter(user=self.request.user)
-
+ 
     def partial_update(self, request, *args, **kwargs):
         notif = self.get_object()
         is_read = request.data.get('is_read')
@@ -216,7 +216,7 @@ class NotificationViewSet(viewsets.ReadOnlyModelViewSet):
             notif.is_read = bool(is_read)
             notif.save(update_fields=['is_read'])
         return Response(NotificationSerializer(notif).data)
-
+ 
     @action(detail=False, methods=['post'], url_path='mark_all_read')
     def mark_all_read(self, request):
         self.get_queryset().filter(is_read=False).update(is_read=True)

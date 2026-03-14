@@ -8,7 +8,6 @@ router.register(r'profiles', UserProfileViewSet, basename='profile')
 
 urlpatterns = [
     path('', include(router.urls)),
-    # Include Djoser user management and token auth
-    path('', include('djoser.urls')),          # registration, password reset, etc.
-    path('', include('djoser.urls.authtoken')), # login/logout with token
+    path('', include('djoser.urls')),         
+    path('', include('djoser.urls.authtoken')), 
 ]
