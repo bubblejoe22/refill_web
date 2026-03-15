@@ -1,0 +1,297 @@
+/* ════════════════════════════════════════
+   MOBILE.CSS — Responsive styles
+   Breakpoint: 768px and below
+════════════════════════════════════════ */
+
+/* Hamburger button — hidden on desktop */
+.hamburger-btn {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+
+.hamburger-icon {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 22px;
+}
+
+.hamburger-icon span {
+  display: block;
+  height: 2px;
+  width: 100%;
+  background: var(--text);
+  border-radius: 2px;
+  transition: all 0.25s ease;
+  transform-origin: center;
+}
+
+/* Animate to X when open */
+.hamburger-icon.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.hamburger-icon.open span:nth-child(2) { opacity: 0; }
+.hamburger-icon.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+/* Overlay behind sidebar */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 99;
+}
+
+@media (max-width: 768px) {
+
+  /* Switch to single column layout */
+  .app {
+    grid-template-columns: 1fr;
+    grid-template-rows: var(--header-h) 1fr;
+    grid-template-areas:
+      "header"
+      "main";
+  }
+
+  /* Sidebar becomes a fixed off-screen drawer */
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 260px;
+    z-index: 100;
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.2);
+  }
+
+  /* Slide in when open */
+  .sidebar.sidebar-open {
+    transform: translateX(0);
+  }
+
+  /* Show overlay when sidebar is open */
+  .sidebar-overlay {
+    display: block;
+  }
+
+  /* Show hamburger on mobile */
+  .hamburger-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Header adjustments */
+  .top-header {
+    padding: 0 16px;
+    gap: 4px;
+  }
+
+  .page-title {
+    font-size: 16px;
+  }
+
+  .page-sub {
+    display: none;
+  }
+
+  .logout-btn {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+
+  /* Main area padding */
+  .main-area {
+    padding: 16px;
+  }
+
+  /* Home stats — 2 columns on mobile */
+  .home-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* Quick actions — 2 columns on mobile */
+  .quick-actions {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* Stations grid — single column */
+  .stations-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Order layout — stack vertically */
+  .order-layout {
+    grid-template-columns: 1fr;
+  }
+
+  /* Profile layout — stack vertically */
+  .profile-layout {
+    grid-template-columns: 1fr;
+  }
+
+  /* Orders table — allow horizontal scroll */
+  .orders-table-wrap {
+    overflow-x: auto;
+  }
+
+  /* Track container — full width */
+  .track-container {
+    max-width: 100%;
+  }
+
+  /* Hero padding */
+  .home-hero {
+    padding: 20px;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .home-hero-art {
+    display: none;
+  }
+}
+
+@media (max-width: 400px) {
+  .home-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .quick-actions {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .cancel-confirm-actions {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Order / Schedule pages */
+  .op-page {
+    padding: 16px;
+    align-items: flex-start;
+  }
+
+  .op-card {
+    grid-template-columns: 1fr;
+    min-height: unset;
+    border-radius: 16px;
+  }
+
+  .op-sidebar {
+    padding: 24px 20px;
+    border-radius: 0;
+  }
+
+  .op-sidebar__title {
+    font-size: 18px;
+    margin-bottom: 16px;
+  }
+
+  /* Hide the steps list on mobile to save space */
+  .op-steps {
+    display: none;
+  }
+
+  .op-station-pill {
+    margin-top: 16px;
+  }
+
+  .op-content {
+    padding: 24px 20px;
+  }
+
+  .op-freq-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .op-row-2 {
+    grid-template-columns: 1fr;
+  }
+
+  .op-footer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+  }
+
+  .op-footer__actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .op-btn-primary,
+  .op-btn-ghost {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .op-success__actions {
+    flex-direction: column;
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Hide table headers and switch to card layout */
+  .orders-table thead {
+    display: none;
+  }
+
+  .orders-table,
+  .orders-table tbody,
+  .orders-table tr,
+  .orders-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .orders-table tr {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 10px;
+    padding: 14px 16px;
+  }
+
+  .orders-table tr:hover td {
+    background: transparent;
+  }
+
+  .orders-table td {
+    padding: 4px 0;
+    border-bottom: none;
+    font-size: 13px;
+  }
+
+  /* Label each cell using data attributes */
+  .orders-table td::before {
+    content: attr(data-label);
+    font-family: var(--font);
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: block;
+    margin-bottom: 2px;
+  }
+
+  .td-actions {
+    flex-wrap: wrap;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+  }
+
+  .orders-table-wrap {
+    background: transparent;
+    border: none;
+  }
+}

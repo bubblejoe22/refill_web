@@ -51,7 +51,7 @@ export default function NotificationModal({ onClose, navigate }) {
         <span className="notif-title">Notifications</span>
         {unreadCount > 0 && (
           <button className="notif-mark-all" onClick={markAllRead}>
-            Mark all read
+            Mark all as read
           </button>
         )}
       </div>

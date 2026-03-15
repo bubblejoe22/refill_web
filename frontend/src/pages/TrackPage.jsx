@@ -10,6 +10,7 @@ const STEPS = [
   { id: 'delivered',  icon: '✅', label: 'Delivered',        desc: 'Order successfully delivered' },
 ]
 const STEP_INDEX = { pending: 0, processing: 1, shipped: 2, delivered: 3 }
+const CANCELLABLE_STATUSES = ['pending', 'processing']
 
 export default function TrackPage({ navigate, orderId, order: passedOrder }) {
   const { orders, refreshOrders } = useOrders()

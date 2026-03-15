@@ -17,10 +17,11 @@ export default function AppShell({ page, navigate, children }) {
   const { orders } = useOrders()
   const { unreadCount, fetchNotifications } = useNotifications()
   const [showNotifs, setShowNotifs] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   const initials = user?.username?.slice(0, 2).toUpperCase() || 'U'
 
   const handleBell = () => {
-    fetchNotifications()   
+    fetchNotifications()
     setShowNotifs(v => !v)
   }
 
@@ -29,9 +30,19 @@ export default function AppShell({ page, navigate, children }) {
     navigate('welcome')
   }
 
+  const handleNav = (id) => {
+    navigate(id)
+    setSidebarOpen(false)  // close sidebar after navigation on mobile
+  }
+
   return (
     <div className="app">
-      <aside className="sidebar">
+      {/* Overlay — shown behind sidebar on mobile when open */}
+      {sidebarOpen && (
+        <div className="sidebar-overlay" onClick={() => setSidebarOpen(false)} />
+      )}
+
+      <aside className={`sidebar ${sidebarOpen ? 'sidebar-open' : ''}`}>
         <div className="sidebar-brand">
           <div className="brand-drop">💧</div>
           <div>
@@ -53,7 +64,7 @@ export default function AppShell({ page, navigate, children }) {
             <button
               key={n.id}
               className={`nav-item ${page === n.id ? 'nav-active' : ''}`}
-              onClick={() => navigate(n.id)}
+              onClick={() => handleNav(n.id)}
             >
               <span className="nav-icon">{n.icon}</span>
               <span>{n.label}</span>
@@ -74,6 +85,17 @@ export default function AppShell({ page, navigate, children }) {
       </aside>
 
       <header className="top-header">
+        {/* Hamburger button — only visible on mobile */}
+        <button
+          className="hamburger-btn"
+          onClick={() => setSidebarOpen(v => !v)}
+          aria-label="Toggle menu"
+        >
+          <span className={`hamburger-icon ${sidebarOpen ? 'open' : ''}`}>
+            <span /><span /><span />
+          </span>
+        </button>
+
         <div className="header-left">
           <h1 className="page-title">
             {NAV.find(n => n.id === page)?.icon}{' '}

@@ -19,7 +19,7 @@ apiClient.interceptors.response.use(
     if (error.response?.status === 401) {
       localStorage.removeItem('authToken')
       localStorage.removeItem('authUser')
-      window.location.reload()
+      window.location.href = '/'
     }
     if (error.response?.status === 403) console.error('Permission denied')
     return Promise.reject(error)

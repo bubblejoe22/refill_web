@@ -73,18 +73,17 @@ export default function HistoryPage({ navigate }) {
                 const nCount = noteCount(o)
                 return (
                   <tr key={o.id}>
-                    <td className="td-muted">#{o.id}</td>
-                    <td className="td-station">{o.station || o.notes || o.shipping_address || '—'}</td>
-                    <td className="td-muted">{o.date || o.created_at?.slice(0, 10) || '—'}</td>
-                    <td>{o.qty || o.quantity || '—'} gal</td>
-                    <td className="td-price">{fmt(o.total || o.total_price || 0)}</td>
-                    <td>
+                    <td className="td-muted" data-label="Order ID">#{o.id}</td>
+                    <td className="td-station" data-label="Station">{o.station || o.notes || o.shipping_address || '—'}</td>
+                    <td className="td-muted" data-label="Date">{o.date || o.created_at?.slice(0, 10) || '—'}</td>
+                    <td data-label="Quantity">{o.qty || o.quantity || '—'} gal</td>
+                    <td className="td-price" data-label="Total">{fmt(o.total || o.total_price || 0)}</td>
+                    <td data-label="Status">
                       <span className="oc-status" style={{ background: s.bg, color: s.color }}>
                         {o.status}
                       </span>
                     </td>
-
-                    <td className="td-notes">
+                    <td className="td-notes" data-label="Notes">
                       {nCount > 0 ? (
                         <button
                           className="note-badge-btn"
@@ -96,8 +95,9 @@ export default function HistoryPage({ navigate }) {
                         <span className="td-muted">—</span>
                       )}
                     </td>
-
+                    
                     <td className="td-actions">
+                      {/* rest stays the same */}
                       {['pending', 'processing', 'shipped'].includes(o.status?.toLowerCase()) && (
                         <button className="reorder-btn" onClick={() => navigate('track', { orderId: o.id })}>
                           📍 Track
