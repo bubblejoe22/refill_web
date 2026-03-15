@@ -9,6 +9,16 @@ export function NotificationsProvider({ children }) {
 
   const fetchNotifications = useCallback(async () => {
     setLoading(true)
+    
+    const token = localStorage.getItem('access');
+    
+    if (!token) {
+      setNotifications([]); // Optional: clear notifications if logged out
+      return; 
+    }
+
+    setLoading(true)
+    
     try {
       const r = await apiClient.get('/notifications/')
       const data = Array.isArray(r.data) ? r.data : r.data?.results || []
