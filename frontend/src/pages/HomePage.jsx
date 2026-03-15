@@ -12,9 +12,9 @@ const toStation = (product) => ({
   description:    product.description || '',
   waterTypes:     product.category ? [product.category] : [],
   pricePerGallon: parseFloat(product.price ?? 0),
-  deliveryFee:    0,     
-  eta:            '—',       
-  distance:       '—',    
+  deliveryFee:    parseFloat(product.delivery_fee ?? 0),  
+  eta:            product.eta || '—',                    
+  distance:       product.location || '—',      
   rating:         null,   
   stock:          product.stock ?? 0,
   open:           product.is_active ?? true,
@@ -69,7 +69,7 @@ export default function HomePage({ navigate }) {
               <FaShoppingCart size={28} />
               <p>Refill Now</p>
             </div>
-            <div className="quick-card" onClick={() => navigate('schedule')}>
+            <div className="quick-card" onClick={() => stations.length > 0 ? navigate('schedule', { station: stations[0] }) : navigate('browse')}>
               <FaCalendarAlt size={28} />
               <p>Schedule</p>
             </div>

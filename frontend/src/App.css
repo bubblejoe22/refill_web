@@ -1011,3 +1011,143 @@ body{
   justify-content:space-between;
   box-shadow:0 2px 8px rgba(0,0,0,0.08);
 }
+
+/* ── Note badge button in History table ── */
+.note-badge-btn {
+  background: #eff6ff;
+  border: 1.5px solid var(--blue-light);
+  color: var(--blue-deep);
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all .15s;
+  white-space: nowrap;
+}
+.note-badge-btn:hover {
+  background: var(--blue-light);
+  border-color: var(--blue-mid);
+}
+
+.notes-section {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.notes-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.notes-title {
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+}
+.notes-count {
+  font-family: var(--font);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--blue-mid);
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: 20px;
+  padding: 2px 10px;
+}
+
+.notes-loading,
+.notes-empty {
+  font-size: 13px;
+  color: var(--muted);
+  text-align: center;
+  padding: 12px 0;
+}
+
+/* Note list */
+.notes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.note-item {
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  transition: border-color .15s;
+}
+.note-item:hover { border-color: var(--blue-light); }
+
+/* Read mode */
+.note-content {
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.6;
+  margin-bottom: 10px;
+  font-style: italic;
+}
+.note-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.note-date {
+  font-size: 11px;
+  color: var(--muted);
+}
+.note-actions { display: flex; gap: 6px; }
+.note-action-btn {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: var(--font);
+  cursor: pointer;
+  transition: all .15s;
+}
+.edit-btn   { color: var(--blue-deep); }
+.edit-btn:hover { background: var(--bg); border-color: var(--blue-mid); }
+.delete-btn { color: var(--danger); }
+.delete-btn:hover { background: #fef2f2; border-color: var(--danger); }
+
+/* Edit mode */
+.note-edit-mode { display: flex; flex-direction: column; gap: 8px; }
+.note-inp { width: 100%; min-height: 72px; resize: vertical; }
+.inp-error { border-color: var(--danger) !important; }
+.note-char-count { font-size: 11px; color: var(--muted); text-align: right; margin: 0; }
+.note-char-count.warn { color: var(--warning); font-weight: 700; }
+.field-error { font-size: 12px; color: var(--danger); font-weight: 600; margin: 0; }
+.note-edit-btns { display: flex; gap: 8px; justify-content: flex-end; }
+.note-btn { padding: 8px 16px !important; font-size: 13px !important; }
+
+/* Add note form */
+.note-add-form {
+  border-top: 1.5px solid var(--border);
+  padding-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.note-add-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.note-submit-btn {
+  padding: 9px 20px !important;
+  font-size: 13px !important;
+  width: auto !important;
+}

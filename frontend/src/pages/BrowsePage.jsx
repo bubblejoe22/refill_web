@@ -3,30 +3,18 @@ import { productsAPI } from '../api/products'
 import StationModal from '../modals/StationModals'
 
 import {
-  FaTint,
-  FaBolt,
-  FaCircle,
-  FaStar,
-  FaMapMarkerAlt,
-  FaShoppingCart,
-  FaCalendarAlt,
-  FaSearch
+  FaTint, FaBolt, FaCircle, FaStar,
+  FaMapMarkerAlt, FaShoppingCart, FaCalendarAlt, FaSearch
 } from "react-icons/fa"
-
-
 import { IoWater } from "react-icons/io5"
 import { GiBubbles, GiMountains } from "react-icons/gi"
 
 const fmt = (n) => `₱${Number(n).toLocaleString()}`
 const WATER_TYPES = ['All', 'Purified', 'Alkaline', 'Mineral']
 
-const SAMPLE_STATIONS = [
-  { id: 1, name: 'AquaPure Station',    icon: <FaTint />, distance: '0.5 km', pricePerGallon: 25, deliveryFee: 20, eta: '15–20 min', rating: 4.8, waterTypes: ['Purified','Alkaline'], open: true  },
-  { id: 2, name: 'Crystal Clear Water', icon: <IoWater />, distance: '1.2 km', pricePerGallon: 23, deliveryFee: 25, eta: '20–25 min', rating: 4.6, waterTypes: ['Purified','Mineral'],  open: true  },
-  { id: 3, name: 'Blue Spring Refill',  icon: <GiBubbles />, distance: '2.0 km', pricePerGallon: 28, deliveryFee: 15, eta: '25–30 min', rating: 4.9, waterTypes: ['Alkaline','Mineral'],  open: false },
-  { id: 4, name: 'H2O Express',         icon: <FaBolt />, distance: '2.5 km', pricePerGallon: 22, deliveryFee: 30, eta: '10–15 min', rating: 4.5, waterTypes: ['Purified'],           open: true  },
-  { id: 5, name: 'Pure Drop Refill',    icon: <FaCircle />, distance: '3.1 km', pricePerGallon: 26, deliveryFee: 18, eta: '20–30 min', rating: 4.7, waterTypes: ['Alkaline'],           open: true  },
-  { id: 6, name: 'Mountain Spring Co.', icon: <GiMountains />, distance: '3.8 km', pricePerGallon: 30, deliveryFee: 20, eta: '30–40 min', rating: 4.9, waterTypes: ['Mineral'],            open: true  },
+const STATION_ICONS = [
+  <FaTint />, <IoWater />, <GiBubbles />,
+  <FaBolt />, <FaCircle />, <GiMountains />
 ]
 
 function StationCard({ station, onOrder, onSchedule, onViewDetails }) {
@@ -39,38 +27,41 @@ function StationCard({ station, onOrder, onSchedule, onViewDetails }) {
             <button className="sc-name sc-name-link" onClick={() => onViewDetails(station)}>
               {station.name}
             </button>
-            <div className="sc-dist"><FaMapMarkerAlt/> {station.distance}</div>
+            {station.distance && station.distance !== '—' && (
+              <div className="sc-dist"><FaMapMarkerAlt /> {station.distance}</div>
+            )}
           </div>
         </div>
-
         <div className="sc-right">
-          <div className="sc-rating"><FaStar/> {station.rating}</div>
+          {station.rating && <div className="sc-rating"><FaStar /> {station.rating}</div>}
           {!station.open && <div className="sc-closed-tag">Closed</div>}
         </div>
       </div>
 
-      <div className="sc-types">
-        {station.waterTypes.map(t => <span key={t} className="wtype">{t}</span>)}
-      </div>
+      {station.waterTypes.length > 0 && (
+        <div className="sc-types">
+          {station.waterTypes.map(t => <span key={t} className="wtype">{t}</span>)}
+        </div>
+      )}
 
       <div className="sc-info">
         <div className="sc-info-item">
           <div className="sci-label">Per Gallon</div>
           <div className="sci-val">{fmt(station.pricePerGallon)}</div>
         </div>
-
         <div className="sc-divider" />
-
         <div className="sc-info-item">
           <div className="sci-label">Delivery</div>
-          <div className="sci-val">{fmt(station.deliveryFee)}</div>
+          {/* ✅ FIXED: reads real delivery_fee from DB */}
+          <div className="sci-val">
+            {station.deliveryFee > 0 ? fmt(station.deliveryFee) : 'Free'}
+          </div>
         </div>
-
         <div className="sc-divider" />
-
         <div className="sc-info-item">
           <div className="sci-label">ETA</div>
-          <div className="sci-val">{station.eta}</div>
+          {/* ✅ FIXED: reads real eta from DB */}
+          <div className="sci-val">{station.eta || '—'}</div>
         </div>
       </div>
 
@@ -80,22 +71,11 @@ function StationCard({ station, onOrder, onSchedule, onViewDetails }) {
           disabled={!station.open}
           onClick={() => onOrder(station)}
         >
-          {station.open ? (
-            <>
-              <FaShoppingCart/> Order Now
-            </>
-          ) : (
-            'Closed'
-          )}
+          {station.open ? <><FaShoppingCart /> Order Now</> : 'Closed'}
         </button>
-
         {station.open && (
-          <button
-            className="schedule-icon-btn"
-            onClick={() => onSchedule(station)}
-            title="Schedule"
-          >
-            <FaCalendarAlt/>
+          <button className="schedule-icon-btn" onClick={() => onSchedule(station)} title="Schedule">
+            <FaCalendarAlt />
           </button>
         )}
       </div>
@@ -104,70 +84,51 @@ function StationCard({ station, onOrder, onSchedule, onViewDetails }) {
 }
 
 export default function BrowsePage({ navigate }) {
-
-  const [stations, setStations] = useState(SAMPLE_STATIONS)
-  const [filter, setFilter] = useState('All')
-  const [search, setSearch] = useState('')
-  const [sortBy, setSortBy] = useState('distance')
-  const [selectedStation, setSelectedStation] = useState(null)  // controls StationModal
-
-  const STATION_ICONS = [
-    <FaTint />,
-    <IoWater />,
-    <GiBubbles />,
-    <FaBolt />,
-    <FaCircle />,
-    <GiMountains />
-  ]
+  // ✅ FIXED: was initialized with SAMPLE_STATIONS which was never defined — crashes on load
+  const [stations,  setStations]  = useState([])
+  const [loading,   setLoading]   = useState(true)
+  const [filter,    setFilter]    = useState('All')
+  const [search,    setSearch]    = useState('')
+  const [sortBy,    setSortBy]    = useState('distance')
+  const [selectedStation, setSelectedStation] = useState(null)
 
   useEffect(() => {
+    setLoading(true)
     productsAPI.getAll().then(r => {
-
-      const data = Array.isArray(r.data) ? r.data : r.data?.results || []
-
-      if (data.length) {
-
-        setStations(
-          data.map((p, i) => ({
-            id: p.id,
-            name: p.name,
-            icon: STATION_ICONS[i % 6],
-            distance: `${(Math.random()*3+0.3).toFixed(1)} km`,
-            pricePerGallon: parseFloat(p.price) || 25,
-            deliveryFee: 20,
-            eta: '15–25 min',
-            rating: (4.4 + Math.random()*0.6).toFixed(1),
-            waterTypes: p.category ? [p.category] : ['Purified'],
-            open: p.is_active !== false,
-          }))
-        )
-
-      }
-
-    }).catch(() => {})
+      const data = Array.isArray(r.data) ? r.data : (r.data?.results ?? [])
+      setStations(
+        data.map((p, i) => ({
+          id:             p.id,
+          name:           p.name,
+          icon:           STATION_ICONS[i % STATION_ICONS.length],
+          pricePerGallon: parseFloat(p.price) || 0,
+          deliveryFee:    parseFloat(p.delivery_fee) || 0,  // ✅ real DB field
+          eta:            p.eta || '—',                     // ✅ real DB field
+          distance:       p.location || '—',                // ✅ real DB field (location)
+          rating:         null,
+          // ✅ FIXED: was p.category (ID number), now uses p.category_name (string)
+          waterTypes:     p.category_name ? [p.category_name] : ['Purified'],
+          open:           p.is_active !== false,
+          emoji:          '💧',
+        }))
+      )
+    }).catch(() => {}).finally(() => setLoading(false))
   }, [])
 
   const displayed = stations
     .filter(s => filter === 'All' || s.waterTypes.includes(filter))
     .filter(s => s.name.toLowerCase().includes(search.toLowerCase()))
     .sort((a, b) => {
-
-      if (sortBy === 'price') return a.pricePerGallon - b.pricePerGallon
-
-      if (sortBy === 'rating') return b.rating - a.rating
-
+      if (sortBy === 'price')  return a.pricePerGallon - b.pricePerGallon
+      if (sortBy === 'rating') return (b.rating ?? 0) - (a.rating ?? 0)
       return parseFloat(a.distance) - parseFloat(b.distance)
-
     })
 
   return (
     <div>
-
       <div className="controls-bar">
-
         <div className="search-wrap">
-          <span><FaSearch/></span>
-
+          <span><FaSearch /></span>
           <input
             className="search-inp"
             placeholder="Search stations…"
@@ -175,58 +136,49 @@ export default function BrowsePage({ navigate }) {
             onChange={e => setSearch(e.target.value)}
           />
         </div>
-
         <div className="filter-row">
           {WATER_TYPES.map(t => (
-            <button
-              key={t}
+            <button key={t}
               className={`filter-chip ${filter === t ? 'active' : ''}`}
-              onClick={() => setFilter(t)}
-            >
+              onClick={() => setFilter(t)}>
               {t}
             </button>
           ))}
         </div>
-
-        <select
-          className="sort-sel"
-          value={sortBy}
-          onChange={e => setSortBy(e.target.value)}
-        >
+        <select className="sort-sel" value={sortBy} onChange={e => setSortBy(e.target.value)}>
           <option value="distance">Nearest first</option>
           <option value="price">Cheapest first</option>
           <option value="rating">Top rated</option>
         </select>
-
       </div>
 
       <div className="results-meta">
-        {displayed.length} station{displayed.length !== 1 ? 's' : ''} found
+        {loading
+          ? 'Loading stations…'
+          : `${displayed.length} station${displayed.length !== 1 ? 's' : ''} found`}
       </div>
 
-      {displayed.length === 0
-        ? (
-          <div className="empty">
-            <span><FaTint/></span>
-            <p>No stations match your filters</p>
-          </div>
-        )
-        : (
-          <div className="stations-grid">
-            {displayed.map(s => (
-              <StationCard
-                key={s.id}
-                station={s}
-                onOrder={station => navigate('order', { station })}
-                onSchedule={station => navigate('schedule', { station })}
-                onViewDetails={s => setSelectedStation(s)}
-              />
-            ))}
-          </div>
-        )
-      }
+      {!loading && displayed.length === 0 && (
+        <div className="empty">
+          <span><FaTint /></span>
+          <p>No stations match your filters</p>
+        </div>
+      )}
 
-      {/* StationModal — opens when user clicks a station name */}
+      {!loading && displayed.length > 0 && (
+        <div className="stations-grid">
+          {displayed.map(s => (
+            <StationCard
+              key={s.id}
+              station={s}
+              onOrder={station => navigate('order', { station })}
+              onSchedule={station => navigate('schedule', { station })}
+              onViewDetails={s => setSelectedStation(s)}
+            />
+          ))}
+        </div>
+      )}
+
       {selectedStation && (
         <StationModal
           station={selectedStation}
@@ -235,7 +187,6 @@ export default function BrowsePage({ navigate }) {
           onSchedule={s => { setSelectedStation(null); navigate('schedule', { station: s }) }}
         />
       )}
-
     </div>
   )
 }

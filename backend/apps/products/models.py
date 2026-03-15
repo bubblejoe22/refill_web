@@ -26,6 +26,9 @@ class Product(models.Model):
     image = models.ImageField(upload_to='products/', blank=True, null=True)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    delivery_fee = models.DecimalField(max_digits=8, decimal_places=2, default=0)
+    eta          = models.CharField(max_length=50, blank=True, default='15–25 min')
+    location     = models.CharField(max_length=255, blank=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
