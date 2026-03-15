@@ -3,7 +3,7 @@ import { useOrders } from '../context/OrdersContext'
 import { productsAPI } from '../api/products'
 import { ordersAPI } from '../api/orders'
 import { FaTint, FaMapMarkerAlt, FaStar, FaCalendarAlt } from 'react-icons/fa'
-import './order.css'
+import '../styles/order.css'
 
 const fmt = (n) => `₱${Number(n).toLocaleString()}`
 

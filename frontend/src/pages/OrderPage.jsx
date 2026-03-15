@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useOrders } from '../context/OrdersContext'
 import { ordersAPI } from '../api/orders'
-import './order.css'
+import '../styles/order.css'
 
 const fmt = (n) => `₱${Number(n).toLocaleString()}`
 
