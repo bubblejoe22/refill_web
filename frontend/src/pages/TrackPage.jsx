@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useOrders } from '../context/OrdersContext'
 import { ordersAPI } from '../api/orders'
+import { CANCELLABLE_STATUSES } from '../utils/constants';    
 
 const STEPS = [
   { id: 'pending',    icon: '📋', label: 'Order Placed',    desc: 'Your order has been received' },
