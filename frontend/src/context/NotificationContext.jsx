@@ -11,7 +11,6 @@ export function NotificationsProvider({ children }) {
 
   const fetchNotifications = useCallback(async () => {
     if (!isLoggedIn()) return   // stop if logged out
-    setLoading(true)
     
     const token = localStorage.getItem('access');
     
