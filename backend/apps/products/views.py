@@ -15,13 +15,18 @@ class CategoryViewSet(viewsets.ModelViewSet):
 
 class ProductViewSet(viewsets.ModelViewSet):
     """ViewSet for Product model"""
-    queryset = Product.objects.filter(is_active=True)
     serializer_class = ProductSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
     filterset_fields = ['category', 'is_active']
     search_fields = ['name', 'description']
     ordering_fields = ['price', 'created_at']
     ordering = ['-created_at']
+
+    def get_queryset(self):
+        # COMPLIANCE (PIT - Gap 3 RBAC): Staff see ALL stations; customers see active only
+        if self.request.user and self.request.user.is_authenticated and self.request.user.is_staff:
+            return Product.objects.all()
+        return Product.objects.filter(is_active=True)
 
 
 class StationReviewViewSet(viewsets.ModelViewSet):
