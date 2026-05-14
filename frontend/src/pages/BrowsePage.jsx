@@ -109,7 +109,7 @@ export default function BrowsePage({ navigate }) {
   const [filter, setFilter] = useState('All')
   const [search, setSearch] = useState('')
   const [sortBy, setSortBy] = useState('distance')
-  const [selectedStation, setSelectedStation] = useState(null)  // controls StationModal
+  const [selectedStation, setSelectedStation] = useState(null)  
 
   const STATION_ICONS = [
     <FaTint />,
@@ -226,7 +226,6 @@ export default function BrowsePage({ navigate }) {
         )
       }
 
-      {/* StationModal — opens when user clicks a station name */}
       {selectedStation && (
         <StationModal
           station={selectedStation}

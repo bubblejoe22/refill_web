@@ -23,7 +23,6 @@ class ProductViewSet(viewsets.ModelViewSet):
     ordering = ['-created_at']
 
     def get_queryset(self):
-        # COMPLIANCE (PIT - Gap 3 RBAC): Staff see ALL stations; customers see active only
         if self.request.user and self.request.user.is_authenticated and self.request.user.is_staff:
             return Product.objects.all()
         return Product.objects.filter(is_active=True)

@@ -23,7 +23,7 @@ def fix_empty_notification_messages(sender, **kwargs):
                 notif.message = template.format(id=notif.order.id)
                 notif.save(update_fields=['message'])
     except Exception:
-        pass  # table may not exist yet on first migrate
+        pass  
 
 @receiver(pre_save, sender=Order)
 def capture_previous_status(sender, instance, **kwargs):

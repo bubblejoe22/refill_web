@@ -1,6 +1,3 @@
-// COMPLIANCE (Lab 4 - Task 3): Client-side routing with distinct system screens (Login, Home, Track)
-// COMPLIANCE (PIT - Gap 3): RBAC route guard — 'admin' page only accessible to staff users
-
 import { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import WelcomePage    from '../pages/WelcomePage'
@@ -14,24 +11,39 @@ import HistoryPage    from '../pages/HistoryPage'
 import TrackPage      from '../pages/TrackPage'
 import ProfilePage    from '../delivered/ProfilePage'
 import AdminPage      from '../pages/AdminPage'
+import ActivatePage   from '../pages/ActivatePage'
 
 import AppShell from '../components/AppShell'
 
 export default function AppRouter() {
-  // COMPLIANCE (Lab 4 - Task 1): Using Global State (user) to drive the main navigation logic
+
   const { user } = useAuth()
-  // COMPLIANCE (PIT - Gap 3): Staff users land on admin, regular users land on home
-  const [page, setPage] = useState(user ? (user.is_staff ? 'admin' : 'home') : 'welcome')
-  const [pageProps, setPageProps] = useState({})
+
+  const getInitialPage = () => {
+    const path = window.location.pathname
+    const match = path.match(/^\/activate\/([^/]+)\/([^/]+)$/)
+    if (match) return 'activate'
+    return user ? (user.is_staff ? 'admin' : 'home') : 'welcome'
+  }
+
+  const getInitialProps = () => {
+    const path = window.location.pathname
+    const match = path.match(/^\/activate\/([^/]+)\/([^/]+)$/)
+    if (match) return { uid: match[1], token: match[2] }
+    return {}
+  }
+
+  const [page, setPage] = useState(getInitialPage)
+  const [pageProps, setPageProps] = useState(getInitialProps)
 
   const navigate = (to, props = {}) => {
-    // COMPLIANCE (PIT - Gap 3): RBAC guard — redirect non-staff away from admin
+
     if (to === 'admin' && !user?.is_staff) {
       setPage('home')
       setPageProps({})
       return
     }
-    // COMPLIANCE (PIT - Gap 3): RBAC guard — redirect staff away from customer pages
+
     if (user?.is_staff && ['home', 'browse', 'history', 'profile', 'track'].includes(to)) {
       setPage('admin')
       setPageProps({})
@@ -39,6 +51,10 @@ export default function AppRouter() {
     }
     setPageProps(props)
     setPage(to)
+  }
+
+  if (page === 'activate') {
+    return <ActivatePage uid={pageProps.uid} token={pageProps.token} navigate={navigate} />
   }
 
   if (!user) {
@@ -57,7 +73,6 @@ export default function AppRouter() {
         {page === 'history' && !user.is_staff && <HistoryPage navigate={navigate} />}
         {page === 'profile' && !user.is_staff && <ProfilePage navigate={navigate} />}
         {page === 'track'   && !user.is_staff && <TrackPage   navigate={navigate} {...pageProps} />}
-        {/* COMPLIANCE (PIT - Gap 3): Admin page — only rendered if user.is_staff is true */}
         {page === 'admin'   && user.is_staff  && <AdminPage   navigate={navigate} />}
       </AppShell>
     )

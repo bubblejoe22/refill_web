@@ -2,11 +2,13 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from rest_framework_simplejwt.views import TokenBlacklistView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/auth/', include('djoser.urls')),         
-    path('api/auth/', include('djoser.urls.authtoken')), 
+    path('api/auth/', include('djoser.urls')),
+    path('api/auth/jwt/blacklist/', TokenBlacklistView.as_view(), name='jwt-blacklist'),
+    path('api/auth/', include('djoser.urls.jwt')),
     path('api/products/', include('apps.products.urls')),
     path('api/orders/', include('apps.orders.urls')),
     path('api/notifications/', include('apps.orders.urls')),

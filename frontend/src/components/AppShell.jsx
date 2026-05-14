@@ -14,26 +14,16 @@ const CUSTOMER_NAV = [
 
 const ADMIN_NAV = { id: 'admin', icon: '🛡️', label: 'Admin Panel' }
 
-// COMPLIANCE (Lab 3 - Task 1): Reusable UI component that manages the layout shell using props (page, navigate, children)
 export default function AppShell({ page, navigate, children }) {
   const { user, logout } = useAuth()
   const { orders } = useOrders()
-
-  // COMPLIANCE (PIT - Gap 3): Staff only see the Admin nav item; customers see the full nav
   const NAV = user?.is_staff ? [ADMIN_NAV] : [...CUSTOMER_NAV, ADMIN_NAV]
-
-  // COMPLIANCE (Lab 4 - Task 1): Using Global State (unreadCount) to update UI components
   const { unreadCount, fetchNotifications } = useNotifications()
-
-  // COMPLIANCE (Lab 4 - Task 1): Component-level state for UI visibility (sidebar/modals)
   const [showNotifs, setShowNotifs] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
-
   const initials = user?.username?.slice(0, 2).toUpperCase() || 'U'
-
   const handleBell = () => {
     fetchNotifications()
-    // COMPLIANCE (Lab 4 - Task 2): Interaction triggers a visible state change (toggling modal)
     setShowNotifs(v => !v)
   }
 
@@ -43,17 +33,14 @@ export default function AppShell({ page, navigate, children }) {
   }
 
   const handleNav = (id) => {
-    // COMPLIANCE (Lab 4 - Task 3): Implementing navigation logic to switch between system screens
     navigate(id)
-    setSidebarOpen(false)  // close sidebar after navigation on mobile
+    setSidebarOpen(false)  
   }
 
-  // All nav items for header title lookup
   const ALL_NAV = [...CUSTOMER_NAV, ADMIN_NAV]
 
   return (
     <div className="app">
-      {/* Overlay — shown behind sidebar on mobile when open */}
       {sidebarOpen && (
         <div className="sidebar-overlay" onClick={() => setSidebarOpen(false)} />
       )}
@@ -76,7 +63,6 @@ export default function AppShell({ page, navigate, children }) {
         </div>
 
         <nav className="sidebar-nav">
-          {/* COMPLIANCE (PIT - Gap 3): nav list built dynamically — admin only sees Admin Panel */}
           {NAV.map(n => (
             <button
               key={n.id}
@@ -108,7 +94,6 @@ export default function AppShell({ page, navigate, children }) {
       </aside>
 
       <header className="top-header">
-        {/* Hamburger button — only visible on mobile */}
         <button
           className="hamburger-btn"
           onClick={() => setSidebarOpen(v => !v)}

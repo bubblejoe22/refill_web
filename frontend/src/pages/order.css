@@ -1,10 +1,4 @@
-/* ============================================================
-   order-schedule.css — uses app CSS variables for consistency
-   Import in your main entry or App.jsx:
-   import './styles/order-schedule.css'
-   ============================================================ */
 
-/* ── Page shell ── */
 .op-page {
   min-height: 100vh;
   background: var(--bg);

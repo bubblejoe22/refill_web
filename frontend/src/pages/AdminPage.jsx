@@ -1,13 +1,10 @@
-// COMPLIANCE (PIT - Gap 3): RBAC — Admin-only page
-// Tabs: (1) Orders — all users, filter by user + sort by recent
-//       (2) Stations — add, set active/inactive/disabled, delete
 import React from 'react'
 import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { ordersAPI } from '../api/orders'
 import { productsAPI } from '../api/products'
 
-// ─── shared palette ───────────────────────────────────────────────────────────
+
 const C = {
   deep:    '#133E87',
   mid:     '#608BC1',
@@ -35,7 +32,7 @@ const fmt        = (n)   => `₱${Number(n).toLocaleString()}`
 const fmtDate    = (str) => new Date(str).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })
 const getStatusStyle = (s) => STATUS_COLOR[s?.toLowerCase()] || { bg: '#f1f5f9', color: C.muted }
 
-// ─── tiny reusable components ─────────────────────────────────────────────────
+
 const Badge = ({ label, style }) => (
   <span style={{
     display: 'inline-block', fontSize: 11, fontWeight: 700,
@@ -61,7 +58,6 @@ const EmptyRow = ({ cols, text }) => (
   <tr><td colSpan={cols} style={{ padding: 40, textAlign: 'center', color: C.muted, fontSize: 14 }}>{text}</td></tr>
 )
 
-// ─── Modal shell ──────────────────────────────────────────────────────────────
 const Modal = ({ title, onClose, children }) => (
   <div style={{
     position: 'fixed', inset: 0, zIndex: 1000,
@@ -88,9 +84,7 @@ const Field = ({ label, children }) => (
   </div>
 )
 
-// ═════════════════════════════════════════════════════════════════════════════
-// TAB 1 — ORDERS
-// ═════════════════════════════════════════════════════════════════════════════
+
 function OrdersTab({ showToast }) {
   const [orders,       setOrders]       = useState([])
   const [loading,      setLoading]      = useState(true)
@@ -138,7 +132,7 @@ function OrdersTab({ showToast }) {
     finally  { setUpdating(u => ({ ...u, [orderId]: false })) }
   }
 
-  // status summary counts (all orders, regardless of user filter)
+
   const counts = { all: orders.length }
   ORDER_STATUSES.forEach(s => { counts[s] = orders.filter(o => o.status === s).length })
 
@@ -153,7 +147,6 @@ function OrdersTab({ showToast }) {
 
   return (
     <div>
-      {/* ── Status summary strip ── */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
         {summaryItems.map(item => (
           <div key={item.key} onClick={() => setStatusFilter(item.key)}
@@ -171,7 +164,6 @@ function OrdersTab({ showToast }) {
         ))}
       </div>
 
-      {/* ── Filters row ── */}
       <div style={{ display: 'flex', gap: 10, marginBottom: 16, flexWrap: 'wrap', alignItems: 'center' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <label style={{ fontSize: 11, fontWeight: 700, color: C.muted, textTransform: 'uppercase', letterSpacing: '0.05em' }}>User</label>
@@ -212,7 +204,6 @@ function OrdersTab({ showToast }) {
         </div>
       )}
 
-      {/* ── Orders table ── */}
       <div className="orders-table-wrap">
         {loading ? <Spinner /> : (
           <table className="orders-table">
@@ -268,7 +259,6 @@ function OrdersTab({ showToast }) {
           </td>
         </tr>
 
-        {/* ── Expanded order details ── */}
         {isX && (
           <tr>
             <td colSpan={7} style={{ padding: '0 18px 16px 18px', background: C.bg }}>
@@ -286,7 +276,7 @@ function OrdersTab({ showToast }) {
                       ))
                   }
                 </div>
-                {/* Address + Notes */}
+
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                   <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 10, padding: '14px 16px' }}>
                     <div style={{ fontSize: 11, fontWeight: 700, color: C.muted, textTransform: 'uppercase', marginBottom: 6 }}>Shipping Address</div>
@@ -323,9 +313,7 @@ function OrdersTab({ showToast }) {
   )
 }
 
-// ═════════════════════════════════════════════════════════════════════════════
-// STATION FORM (shared by Add + Edit modals)
-// ═════════════════════════════════════════════════════════════════════════════
+
 const BLANK_FORM = {
   name: '', description: '', price: '', stock: '',
   delivery_fee: '', eta: '15–25 min', location: '', category: '', is_active: true,
@@ -386,9 +374,7 @@ function StationForm({ form, setForm, categories, saving, onSubmit, onCancel, su
   )
 }
 
-// ═════════════════════════════════════════════════════════════════════════════
-// TAB 2 — STATIONS
-// ═════════════════════════════════════════════════════════════════════════════
+
 const STATION_STATUS = {
   active:   { label: 'Active',   bg: '#d1fae5', color: '#059669' },
   inactive: { label: 'Inactive', bg: '#fef3c7', color: '#d97706' },
@@ -400,7 +386,7 @@ function StationsTab({ showToast }) {
   const [categories, setCategories] = useState([])
   const [loading,    setLoading]    = useState(true)
   const [showAll,    setShowAll]    = useState(true)
-  const [modal,      setModal]      = useState(null)  // null | 'add' | { edit } | { delete }
+  const [modal,      setModal]      = useState(null)  
   const [form,       setForm]       = useState(BLANK_FORM)
   const [saving,     setSaving]     = useState(false)
   const [deleting,   setDeleting]   = useState(false)
@@ -422,14 +408,12 @@ function StationsTab({ showToast }) {
 
   useEffect(() => { fetchAll() }, [fetchAll])
 
-  // derive display status: disabled → inactive (stock=0) → active
   const displayStatus = (s) => {
     if (!s.is_active) return 'disabled'
     if (s.stock === 0) return 'inactive'
     return 'active'
   }
 
-  // ── Add ────────────────────────────────────────────────────────────────────
   const openAdd = () => { setForm(BLANK_FORM); setModal('add') }
   const handleAdd = async () => {
     if (!form.name.trim() || !form.price || !form.stock) {
@@ -452,7 +436,6 @@ function StationsTab({ showToast }) {
     finally  { setSaving(false) }
   }
 
-  // ── Edit ───────────────────────────────────────────────────────────────────
   const openEdit = (station) => {
     setForm({
       name:         station.name,
@@ -486,7 +469,6 @@ function StationsTab({ showToast }) {
     finally  { setSaving(false) }
   }
 
-  // ── Quick status change ────────────────────────────────────────────────────
   const setStationStatus = async (station, newStatus) => {
     const patch =
       newStatus === 'disabled' ? { is_active: false } :
@@ -499,7 +481,6 @@ function StationsTab({ showToast }) {
     } catch { showToast('Failed to change status.', false) }
   }
 
-  // ── Delete ─────────────────────────────────────────────────────────────────
   const handleDelete = async () => {
     setDeleting(true)
     try {
@@ -515,9 +496,7 @@ function StationsTab({ showToast }) {
 
   return (
     <div>
-      {/* ── Header row ── */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18, flexWrap: 'wrap', gap: 10 }}>
-        {/* Status summary chips */}
         <div style={{ display: 'flex', gap: 8 }}>
           {[
             { label: 'Active',   count: countBy('active'),   color: '#059669', bg: '#d1fae5' },
@@ -529,8 +508,6 @@ function StationsTab({ showToast }) {
             </div>
           ))}
         </div>
-
-        {/* Action buttons */}
         <div style={{ display: 'flex', gap: 8 }}>
           <button
             onClick={() => setShowAll(v => !v)}
@@ -550,8 +527,6 @@ function StationsTab({ showToast }) {
           </button>
         </div>
       </div>
-
-      {/* ── Stations table ── */}
       <div className="orders-table-wrap">
         {loading ? <Spinner /> : (
           <table className="orders-table">
@@ -596,7 +571,7 @@ function StationsTab({ showToast }) {
                               ✏ Edit
                             </button>
 
-                            {/* Status controls — only show the transitions that make sense */}
+                          
                             {ds !== 'active' && (
                               <button
                                 onClick={() => setStationStatus(station, 'active')}
@@ -622,7 +597,7 @@ function StationsTab({ showToast }) {
                               </button>
                             )}
 
-                            {/* Delete */}
+                           
                             <button
                               onClick={() => setModal({ delete: station })}
                               style={{ padding: '4px 10px', border: `1.5px solid ${C.danger}`, borderRadius: 7, fontSize: 12, background: '#fff', color: C.danger, cursor: 'pointer', fontFamily: 'inherit', fontWeight: 600 }}
@@ -644,7 +619,7 @@ function StationsTab({ showToast }) {
         Status changes apply immediately · Disable hides station from customers
       </p>
 
-      {/* ── Add modal ── */}
+     
       {modal === 'add' && (
         <Modal title="➕ Add New Station" onClose={() => setModal(null)}>
           <StationForm
@@ -655,7 +630,7 @@ function StationsTab({ showToast }) {
         </Modal>
       )}
 
-      {/* ── Edit modal ── */}
+      
       {modal?.edit && (
         <Modal title={`✏ Edit — ${modal.edit.name}`} onClose={() => setModal(null)}>
           <StationForm
@@ -666,7 +641,7 @@ function StationsTab({ showToast }) {
         </Modal>
       )}
 
-      {/* ── Delete confirm modal ── */}
+      
       {modal?.delete && (
         <Modal title="🗑 Delete Station" onClose={() => setModal(null)}>
           <p style={{ fontSize: 14, color: C.text, marginBottom: 20, lineHeight: 1.6 }}>
@@ -695,9 +670,6 @@ function StationsTab({ showToast }) {
   )
 }
 
-// ═════════════════════════════════════════════════════════════════════════════
-// ROOT — AdminPage
-// ═════════════════════════════════════════════════════════════════════════════
 export default function AdminPage() {
   const { user } = useAuth()
   const [tab,   setTab]   = useState('orders')
@@ -717,7 +689,7 @@ export default function AdminPage() {
     <div style={{ padding: '24px 28px', maxWidth: 1200, margin: '0 auto' }}>
       <Toast toast={toast} />
 
-      {/* ── Page header ── */}
+     
       <div style={{ marginBottom: 24 }}>
         <h2 style={{ fontFamily: 'var(--font)', fontSize: 22, fontWeight: 800, color: C.text, marginBottom: 4 }}>
           🛡️ Admin Dashboard
@@ -727,7 +699,7 @@ export default function AdminPage() {
         </p>
       </div>
 
-      {/* ── Tabs ── */}
+     
       <div style={{ display: 'flex', gap: 4, marginBottom: 24, borderBottom: `2px solid ${C.border}`, paddingBottom: 0 }}>
         {tabs.map(t => (
           <button
@@ -746,7 +718,7 @@ export default function AdminPage() {
         ))}
       </div>
 
-      {/* ── Tab content ── */}
+     
       {tab === 'orders'   && <OrdersTab   showToast={showToast} />}
       {tab === 'stations' && <StationsTab showToast={showToast} />}
     </div>
