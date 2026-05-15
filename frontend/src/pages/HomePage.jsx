@@ -57,7 +57,7 @@ export default function HomePage({ navigate }) {
 
           {/* TOPBAR */}
           <div className="topbar">
-            <h2>Hello, {user?.username} 👋</h2>
+            <h2>Hello, {user?.first_name ? `${user.first_name} ${user.last_name}`.trim() : user?.username} 👋</h2>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               <FaMapMarkerAlt /> Carmen, Cagayan de Oro
             </div>

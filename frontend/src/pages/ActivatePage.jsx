@@ -1,10 +1,15 @@
 import { useEffect, useState } from 'react'
 import apiClient from '../api/client'
+import { useAuth } from '../context/AuthContext'
 
 export default function ActivatePage({ uid, token, navigate }) {
+  const { logout } = useAuth()
   const [status, setStatus] = useState('loading')
 
   useEffect(() => {
+    // Clear any existing session so activation always lands on login
+    logout()
+
     apiClient.post('/auth/users/activation/', { uid, token })
       .then(() => {
         setStatus('success')

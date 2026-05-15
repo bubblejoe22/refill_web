@@ -24,8 +24,8 @@ export function AuthProvider({ children }) {
     const userRes = await axios.get(`${API_BASE_URL}/auth/users/me/`, {
       headers: { Authorization: `Bearer ${access}` }
     })
-    const { username: uname, email, is_staff } = userRes.data
-    const userData = { username: uname, email, is_staff }
+    const { username: uname, email, is_staff, first_name, last_name } = userRes.data
+    const userData = { username: uname, email, is_staff, first_name, last_name }
 
     localStorage.setItem('authUser', JSON.stringify(userData))
     setUser(userData)
